@@ -51,11 +51,14 @@ Inductive tm : Type :=
   | iBool : bool -> tm
   | ttrue : tm
   | tfalse : tm
+  | tzero : tm
+  | tsucc : tm -> tm
+  | tpred : tm -> tm
   | tif : tm -> tm -> tm -> tm
   | tiszero : tm -> tm
   | iand : tm -> tm -> tm (*added for imp maybe change tand to impand*)
   | inot : tm-> tm
-  | ipeq : tm -> tm -> tm
+  | ieq : tm -> tm -> tm
   | ible : tm -> tm -> tm
   | iANum : nat -> tm
   | iAPlus : tm -> tm -> tm
@@ -69,7 +72,7 @@ Inductive bvalue : tm -> Prop :=
   | bv_false : bvalue tfalse.
 
 Inductive nvalue : tm -> Prop :=
-  | nv_zero : nvalue tiszero
+  | nv_zero : nvalue tzero
   | nv_succ : forall t, nvalue t -> nvalue (tsucc t).
 
 Definition value (t:tm) := bvalue t \/ nvalue t.
@@ -156,10 +159,11 @@ Inductive step : tm -> tm -> Prop :=
       (tif tfalse t1) ==> tfalse
       (tif ttrue t1)==> (tif false t2) ==> tfalse
       ( 
-*)    
+    
 
 where "t1 '==>' t2" := (step t1 t2).
 
+*)
 Hint Constructors step.
 
 (** Notice that the [step] relation doesn't care about whether
@@ -183,15 +187,15 @@ Hint Constructors step.
     them in our definition of possible "results of reduction").  Such
     terms are _stuck_. *)
 
-Notation step_normal_form := (normal_form step).
+(*Notation step_normal_form := (normal_form step).
 
 Definition stuck (t:tm) : Prop :=
   step_normal_form t /\ ~ value t.
 
 Hint Unfold stuck.
-
+*)
 (** **** Exercise: 2 stars (some_term_is_stuck)  *)
-Example some_term_is_stuck :
+(*Example some_term_is_stuck :
   exists t, stuck t.
 Proof.
   (* FILL IN HERE *) Admitted.
@@ -206,7 +210,7 @@ Proof.
 Lemma value_is_nf : forall t,
   value t -> step_normal_form t.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  (* FILL IN HERE *) Admitted.*)
 
 (** (Hint: You will reach a point in this proof where you need to
     use an induction to reason about a term that is known to be a
@@ -345,7 +349,7 @@ Inductive has_type : tm -> ty -> Prop :=
        |- t2 \in TNat ->
        |- ible t1 t2 \in TBool
   | T_ANum : forall n:nat,
-       |- iANum n \in TNat
+      |- iANum n \in TNat              
   | T_APlus : forall t1 t2,
        |- t1 \in TNat ->
        |- t2 \in TNat ->
