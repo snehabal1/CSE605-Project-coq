@@ -61,24 +61,26 @@ Inductive tm : Type :=
   | iAMult : tm -> tm -> tm
   | iid : id -> tm
   | iskip : tm
-  | iass : tm -> tm ->tm.
+  | iass : tm -> tm ->tm
+  | iif : tm -> tm -> tm -> tm
+  | iwhile : tm -> tm -> tm.                           
 
 (** _Values_ are [true], [false], and numeric values... *)
-
-(**Inductive bvalue : tm -> Prop :=
+(*
+Inductive bvalue : tm -> Prop :=
   | bv_true : bvalue itrue
-  | bv_false : bvalue ifalse.
-
+  | bv_false : bvalue ifalse.*)
+(*
 Inductive nvalue : tm -> Prop :=
-  | nv_zero : nvalue i_iszero
-  | nv_succ : forall t, nvalue t -> nvalue (tsucc t).
+  | nv_zero : nvalue tzero
+  | nv_succ : forall t, nvalue t -> nvalue ((iAPlus 1 t) t).
 
 Definition value (t:tm) := bvalue t \/ nvalue t.
 
 Hint Constructors bvalue nvalue.
 Hint Unfold value.
-Hint Unfold update.**)
-
+Hint Unfold update.
+*)
 (* ================================================================= *)
 (** ** Operational Semantics *)
 
@@ -123,8 +125,8 @@ Hint Unfold update.**)
 *)
 
 (** ... and then formally: *)
-
-Reserved Notation "t1 '==>' t2" (at level 40).
+(*
+Reserved Notation "t1 '==>' t2" (at level 40).*)
 (*
 Inductive step : tm -> tm -> Prop :=
   | ST_IfTrue : forall t1 t2,
@@ -161,8 +163,9 @@ Inductive step : tm -> tm -> Prop :=
 
 where "t1 '==>' t2" := (step t1 t2).
 
-*)
-Hint Constructors step.
+ *)
+                           (*
+Hint Constructors step.*)
 
 (** Notice that the [step] relation doesn't care about whether
     expressions make global sense -- it just checks that the operation
@@ -222,11 +225,11 @@ Proof.
 (** **** Exercise: 3 stars, optional (step_deterministic)  *)
 (** Use [value_is_nf] to show that the [step] relation is also
     deterministic. *)
-
+(*
 Theorem step_deterministic:
   deterministic step.
 Proof with eauto.
-  (* FILL IN HERE *) Admitted.
+  (* FILL IN HERE *) Admitted.*)
 (** [] *)
 
 (* ================================================================= *)
@@ -252,14 +255,18 @@ Inductive ty : Type :=
     written to the left of the turnstile.  For the moment, the context
     is always empty. *)
 (** 
+                               |- t1 \in Bool
+                        ---------------------                          (TBool) 
+                        |- ANum t1 \in Bool
+
                            ----------------                            (T_True)
                            |- true \in Bool
 
-                          -----------------                           (T_False)
+                          -----------------                            (T_False)
                           |- false \in Bool
 
              |- t1 \in Bool    |- t2 \in T    |- t3 \in T
-             --------------------------------------------                (T_If)
+             --------------------------------------------               (T_If)
                     |- if t1 then t2 else t3 \in T
 
                              ------------                              (T_Zero)
@@ -274,7 +281,7 @@ Inductive ty : Type :=
                           |- pred t1 \in Nat
 
                             |- t1 \in Nat
-                        ---------------------                        (T_IsZero)
+                        ---------------------                         (T_IsZero)
                         |- iszero t1 \in Bool
 
   ************ starting extending for imp **************************
@@ -285,16 +292,16 @@ Inductive ty : Type :=
 
 
                           |- t1 \in Bool
-                          ---------------                              (T_Not)
+                          ---------------                               (T_Not)
                           |- impnot t1 \in Bool
                         
                         |- t1 \in Nat    |- t2 \in Nat
-                         ------------------------------               (T_Eq)
+                         ------------------------------                  (T_Eq)
                          |- impeq t1 t2 \in Bool
 
                          |- t1 \in Nat    |- t2 \in Nat
-                         ------------------------------               (T_Ble)
-                         |- impble t1 t2 \in Bool
+                         ------------------------------                 (T_Ble)
+                         |- impble t1 t2 \in Bool  
 
 
                         |- t1 \in Nat
@@ -345,7 +352,7 @@ Inductive has_type : tm -> ty -> Prop :=
   | T_APlus : forall t1 t2,
        |- t1 \in TNat ->
        |- t2 \in TNat ->
-       |- iAPlus t1 t2 \in TNat (**should this be in iANum and then it will propagate..?**)
+       |- iAPlus t1 t2 \in TNat
   | T_AMinus : forall t1 t2,
        |- t1 \in TNat ->
        |- t2 \in TNat ->
@@ -362,13 +369,20 @@ Inductive has_type : tm -> ty -> Prop :=
        |- t1 \in TId ->
        |- t2 \in TNat ->
        |- iass t1 t2 \in TCom
-
-                            
+  | T_if : forall t1 t2 t3 T,
+       |- t1 \in TBool ->
+       |- t2 \in T ->          
+       |- t3 \in T ->
+       |- iif t1 t2 t3 \in T
+  | T_While : forall t1 t2 T,
+       |- t1 \in TBool ->
+       |- t2 \in T ->
+       |- iwhile t1 t2 \in T
 where "'|-' t '\in' T" := (has_type t T).
-
+(*
 Hint Constructors has_type.
 
-(**Example has_type_1 :
+Example has_type_1 :
   |- tif tfalse tzero (tsucc tzero) \in TNat.
 Proof.
   apply T_If.
@@ -377,6 +391,7 @@ Proof.
     - apply T_Succ.
        + apply T_Zero.
 Qed.
+*)
 
 (** (Since we've included all the constructors of the typing relation
     in the hint database, the [auto] tactic can actually find this
