@@ -58,7 +58,10 @@ Inductive tm : Type :=
   | iANum : nat -> tm
   | iAPlus : tm -> tm -> tm
   | iAMinus : tm -> tm -> tm
-  | iAMult : tm -> tm -> tm.
+  | iAMult : tm -> tm -> tm
+  | iid : id -> tm
+  | iskip : tm
+  | iass : tm -> tm ->tm.
 
 (** _Values_ are [true], [false], and numeric values... *)
 
@@ -239,6 +242,7 @@ Proof with eauto.
 Inductive ty : Type :=
   | TBool : ty
   | TNat : ty
+  | TId : ty
   | TCom : ty.
 
 (** In informal notation, the typing relation is often written
@@ -350,6 +354,15 @@ Inductive has_type : tm -> ty -> Prop :=
        |- t1 \in TNat ->
        |- t2 \in TNat ->
        |- iAMult t1 t2 \in TNat
+  | T_Id : forall n: id,
+       |- iid n \in TId   
+  | T_Skip :
+       |- iskip \in TCom
+  | T_Ass : forall t1 t2,
+       |- t1 \in TId ->
+       |- t2 \in TNat ->
+       |- iass t1 t2 \in TCom
+
                             
 where "'|-' t '\in' T" := (has_type t T).
 
