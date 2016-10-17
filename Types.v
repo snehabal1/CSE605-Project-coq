@@ -49,13 +49,9 @@ Hint Constructors multi.
 
 Inductive tm : Type :=
   | iBool : bool -> tm
-  | ttrue : tm
-  | tfalse : tm
-  | tzero : tm
-  | tsucc : tm -> tm
-  | tpred : tm -> tm
+  | itrue : tm
+  | ifalse : tm
   | tif : tm -> tm -> tm -> tm
-  | tiszero : tm -> tm
   | iand : tm -> tm -> tm (*added for imp maybe change tand to impand*)
   | inot : tm-> tm
   | ieq : tm -> tm -> tm
@@ -67,19 +63,19 @@ Inductive tm : Type :=
 
 (** _Values_ are [true], [false], and numeric values... *)
 
-Inductive bvalue : tm -> Prop :=
-  | bv_true : bvalue ttrue
-  | bv_false : bvalue tfalse.
+(**Inductive bvalue : tm -> Prop :=
+  | bv_true : bvalue itrue
+  | bv_false : bvalue ifalse.
 
 Inductive nvalue : tm -> Prop :=
-  | nv_zero : nvalue tzero
+  | nv_zero : nvalue i_iszero
   | nv_succ : forall t, nvalue t -> nvalue (tsucc t).
 
 Definition value (t:tm) := bvalue t \/ nvalue t.
 
 Hint Constructors bvalue nvalue.
 Hint Unfold value.
-Hint Unfold update.
+Hint Unfold update.**)
 
 (* ================================================================= *)
 (** ** Operational Semantics *)
@@ -322,17 +318,14 @@ Inductive has_type : tm -> ty -> Prop :=
   | T_Bool : forall n: bool,
        |- iBool n \in TBool
   | T_True :
-       |- ttrue \in TBool
+       |- itrue \in TBool
   | T_False :
-       |- tfalse \in TBool
+       |- ifalse \in TBool
   | T_If : forall t1 t2 t3 T,
        |- t1 \in TBool ->
        |- t2 \in T ->
        |- t3 \in T ->
        |- tif t1 t2 t3 \in T
-  | T_Iszero : forall t1,
-       |- t1 \in TNat ->
-       |- tiszero t1 \in TBool
   | T_And : forall t1 t2,
        |- t1 \in TBool ->
        |- t2 \in TBool ->
@@ -353,7 +346,7 @@ Inductive has_type : tm -> ty -> Prop :=
   | T_APlus : forall t1 t2,
        |- t1 \in TNat ->
        |- t2 \in TNat ->
-       |- iAPlus t1 t2 \in TNat
+       |- iAPlus t1 t2 \in TNat (**should this be in iANum and then it will propagate..?**)
   | T_AMinus : forall t1 t2,
        |- t1 \in TNat ->
        |- t2 \in TNat ->
@@ -367,7 +360,7 @@ where "'|-' t '\in' T" := (has_type t T).
 
 Hint Constructors has_type.
 
-Example has_type_1 :
+(**Example has_type_1 :
   |- tif tfalse tzero (tsucc tzero) \in TNat.
 Proof.
   apply T_If.
