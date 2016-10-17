@@ -51,7 +51,6 @@ Inductive tm : Type :=
   | iBool : bool -> tm
   | itrue : tm
   | ifalse : tm
-  | tif : tm -> tm -> tm -> tm
   | iand : tm -> tm -> tm (*added for imp maybe change tand to impand*)
   | inot : tm-> tm
   | ieq : tm -> tm -> tm
@@ -239,7 +238,8 @@ Proof with eauto.
 
 Inductive ty : Type :=
   | TBool : ty
-  | TNat : ty.
+  | TNat : ty
+  | TCom : ty.
 
 (** In informal notation, the typing relation is often written
     [|- t \in T] and pronounced "[t] has type [T]."  The [|-] symbol
@@ -321,11 +321,6 @@ Inductive has_type : tm -> ty -> Prop :=
        |- itrue \in TBool
   | T_False :
        |- ifalse \in TBool
-  | T_If : forall t1 t2 t3 T,
-       |- t1 \in TBool ->
-       |- t2 \in T ->
-       |- t3 \in T ->
-       |- tif t1 t2 t3 \in T
   | T_And : forall t1 t2,
        |- t1 \in TBool ->
        |- t2 \in TBool ->
