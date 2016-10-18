@@ -242,17 +242,17 @@ Proof with eauto.
 
 Inductive Sec : Type :=
   | High : Sec
-  | Low : Sec
+  | Low : Sec.
             
 Inductive ty : Type :=
   | TBool : ty
   | TNat : ty.
 
 
-Inductive tc : Type :=
-  | Ety : ty -> tc
-  | TCom : tc
-  | TId : ty -> tc.
+Inductive ta : Type :=
+  | Ety : ty -> ta
+  | TCom : ta
+  | TId : ty -> ta.
 
 Check Ety TBool.
 (** In informal notation, the typing relation is often written
@@ -332,7 +332,7 @@ Check Ety TBool.
 
 Reserved Notation "'|-' t '\in' T" (at level 40).
 
-Inductive has_type : tm -> tc -> Prop :=
+Inductive has_type : tm -> ta -> Prop :=
   | T_Bool : forall n: bool,
        |- iBool n \in Ety TBool
   | T_And : forall t1 t2,
@@ -382,6 +382,7 @@ Inductive has_type : tm -> tc -> Prop :=
        |- t2 \in TCom ->
        |- iwhile t1 t2 \in TCom
 where "'|-' t '\in' T" := (has_type t T).
+
 Check iif (iBool true) (iNum 5) (iNum 4).
 Example has_type_not :
 |- (iif (iBool true) (iass (iId (Id 0)) (iNum 5)) (iass (iId (Id 0)) (iNum 4))) \in TCom.
