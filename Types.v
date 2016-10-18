@@ -49,8 +49,6 @@ Hint Constructors multi.
 
 Inductive tm : Type :=
   | iBool : bool -> tm
-  | itrue : tm
-  | ifalse : tm
   | iand : tm -> tm -> tm (*added for imp maybe change tand to impand*)
   | inot : tm-> tm
   | ieq : tm -> tm -> tm
@@ -242,12 +240,21 @@ Proof with eauto.
     _typing relation_ that relates terms to the types (either numeric
     or boolean) of their final results.  *)
 
+Inductive Sec : Type :=
+  | High : Sec
+  | Low : Sec
+            
 Inductive ty : Type :=
   | TBool : ty
-  | TNat : ty
-  | TId : ty
-  | TCom : ty.
+  | TNat : ty.
 
+
+Inductive tc : Type :=
+  | Ety : ty -> tc
+  | TCom : tc
+  | TId : ty -> tc.
+
+Check Ety TBool.
 (** In informal notation, the typing relation is often written
     [|- t \in T] and pronounced "[t] has type [T]."  The [|-] symbol
     is called a "turnstile."  Below, we're going to see richer typing
@@ -325,60 +332,87 @@ Inductive ty : Type :=
 
 Reserved Notation "'|-' t '\in' T" (at level 40).
 
-Inductive has_type : tm -> ty -> Prop :=
+Inductive has_type : tm -> tc -> Prop :=
   | T_Bool : forall n: bool,
-       |- iBool n \in TBool
-  | T_True :
-       |- itrue \in TBool
-  | T_False :
-       |- ifalse \in TBool
+       |- iBool n \in Ety TBool
   | T_And : forall t1 t2,
-       |- t1 \in TBool ->
-       |- t2 \in TBool ->
-       |- iand t1 t2 \in TBool
+       |- t1 \in Ety TBool ->
+       |- t2 \in Ety TBool ->
+       |- iand t1 t2 \in Ety TBool
   | T_Not : forall t1,
-       |- t1 \in TBool ->
-       |- inot t1 \in TBool
+       |- t1 \in Ety TBool ->
+       |- inot t1 \in Ety TBool
   | T_Eq : forall t1 t2,
-       |- t1 \in TNat ->
-       |- t2 \in TNat ->
-       |- ieq t1 t2 \in TBool
+       |- t1 \in Ety TNat ->
+       |- t2 \in Ety TNat ->
+       |- ieq t1 t2 \in Ety TBool
   | T_Ble : forall t1 t2,
-       |- t1 \in TNat ->
-       |- t2 \in TNat ->
-       |- ible t1 t2 \in TBool
+       |- t1 \in Ety TNat ->
+       |- t2 \in Ety TNat ->
+       |- ible t1 t2 \in Ety TBool
   | T_Num : forall n:nat,
-      |- iNum n \in TNat              
+      |- iNum n \in Ety TNat              
   | T_Plus : forall t1 t2,
-       |- t1 \in TNat ->
-       |- t2 \in TNat ->
-       |- iplus t1 t2 \in TNat
+       |- t1 \in Ety TNat ->
+       |- t2 \in Ety TNat ->
+       |- iplus t1 t2 \in Ety TNat
   | T_Minus : forall t1 t2,
-       |- t1 \in TNat ->
-       |- t2 \in TNat ->
-       |- iminus t1 t2 \in TNat
+       |- t1 \in Ety TNat ->
+       |- t2 \in Ety TNat ->
+       |- iminus t1 t2 \in Ety TNat
   | T_Mult : forall t1 t2,
-       |- t1 \in TNat ->
-       |- t2 \in TNat ->
-       |- imult t1 t2 \in TNat
-  | T_Id : forall n: id,
-       |- iId n \in TId   
+       |- t1 \in Ety TNat ->
+       |- t2 \in Ety TNat ->
+       |- imult t1 t2 \in Ety TNat
+  | T_Id : forall (n: id) (s: ty),
+      |- iId n \in TId s                
   | T_Skip :
        |- iskip \in TCom
-  | T_Ass : forall t1 t2,
-       |- t1 \in TId ->
-       |- t2 \in TNat ->
+  | T_Ass : forall t1 t2 (s: ty),
+       |- t1 \in (TId s) ->
+       |- t2 \in Ety s ->
        |- iass t1 t2 \in TCom
-  | T_If : forall t1 t2 t3 T,
-       |- t1 \in TBool ->
-       |- t2 \in T ->          
-       |- t3 \in T ->
-       |- iif t1 t2 t3 \in T
-  | T_While : forall t1 t2 T,
-       |- t1 \in TBool ->
-       |- t2 \in T ->
-       |- iwhile t1 t2 \in T
+  | T_If : forall t1 t2 t3,
+       |- t1 \in Ety TBool ->
+       |- t2 \in TCom ->          
+       |- t3 \in TCom ->
+       |- iif t1 t2 t3 \in TCom
+  | T_While : forall t1 t2 ,
+       |- t1 \in Ety TBool ->
+       |- t2 \in TCom ->
+       |- iwhile t1 t2 \in TCom
 where "'|-' t '\in' T" := (has_type t T).
+Check iif (iBool true) (iNum 5) (iNum 4).
+Example has_type_not :
+|- (iif (iBool true) (iass (iId (Id 0)) (iNum 5)) (iass (iId (Id 0)) (iNum 4))) \in TCom.
+Proof.
+  apply T_If.
+  + apply T_Bool.
+  + apply T_Ass with (s:= TNat).
+    - apply T_Id.
+    - apply T_Num.   
+  + apply T_Ass with (s:= TNat).
+    - apply T_Id.
+    - apply T_Num.
+Qed.
+
+Check iass (iId (Id 0)) (iNum 5).
+Example has_ass :
+|- (iass (iId (Id 0)) (iNum 5)) \in TCom.
+Proof.
+  apply T_Ass with (s:= TNat).
+  apply T_Id.
+  apply T_Num.
+  Qed.
+Check iass (iass (iId (Id 0)) (iNum 5)) (iass (iId (Id 0)) (iNum 6)).
+
+Example has_not_ass :
+|- (iass (iass (iId (Id 0)) (iNum 5)) (iass (iId (Id 0)) (iNum 6))) \in TCom.
+Proof.
+  apply T_Ass with (s:= TNat).
+  apply T_Id.
+  apply T_Num.
+  Qed.
 (*
 Hint Constructors has_type.
 
@@ -401,12 +435,12 @@ Qed.
     _conservative_ (or _static_) approximation: it does not consider
     what happens when the term is reduced -- in particular, it does
     not calculate the type of its normal form. *)
-
+(*
 Example has_type_not :
   ~ (|- tif tfalse tzero ttrue \in TBool).
 Proof.
   intros Contra. solve_by_inverts 2.  Qed.
-
+)*
 (** **** Exercise: 1 star, optional (succ_hastype_nat__hastype_nat)  *)
 Example succ_hastype_nat__hastype_nat : forall t,
   |- tsucc t \in TNat ->
