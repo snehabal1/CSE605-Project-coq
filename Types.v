@@ -384,6 +384,74 @@ Inductive has_type : tm -> ta -> Prop :=
 where "'|-' t '\in' T" := (has_type t T).
 
 Check iif (iBool true) (iNum 5) (iNum 4).
+
+Example has_bool :
+|- (iBool true) \in Ety TBool.
+Proof.
+- apply T_Bool.
+Qed.
+
+(**Example has_num_in_bool :
+|- (iBool (iNum 5)) \in Ety TBool.
+Proof.
+- apply T_Bool.
+Qed.**)
+
+Example has_and :
+|- (iand (iBool true) (iBool false)) \in Ety TBool.
+Proof.
+-apply T_And.
++apply T_Bool.
++apply T_Bool.
+Qed.
+(** -apply T_Bool. why is this not working ?? **)
+
+Example has_num :
+|- iNum 5 \in Ety TNat.
+Proof.
+-apply T_Num.
+Qed.
+
+Example has_not :
+|- (inot (iBool true)) \in Ety TBool.
+Proof.
+-apply T_Not.
++apply T_Bool.
+Qed.
+
+Example has_equal :
+|- (ieq (iNum 4) (iNum 5)) \in Ety TBool.
+Proof.
+-apply T_Eq.
++apply T_Num.
++apply T_Num.
+Qed.
+
+Example has_minus :
+|- iminus (iNum 5) (iNum 4) \in Ety TNat.
+Proof.
+-apply T_Minus.
++apply T_Num.
++apply T_Num.
+Qed.
+
+Example has_id :
+|- iId (Id 1) \in TId TNat.
+Proof.
+-apply T_Id.
+Qed.
+
+Check iNum 5.
+Example has_while :
+|- iwhile (iBool true) (iass (iId (Id 0)) (iNum 5)) \in TCom.
+Proof.
+  apply T_While.
+  + apply T_Bool.
+  + apply T_Ass with (s:= TNat).
+    - apply T_Id.
+    - apply T_Num.
+Qed.
+ 
 Example has_type_not :
 |- (iif (iBool true) (iass (iId (Id 0)) (iNum 5)) (iass (iId (Id 0)) (iNum 4))) \in TCom.
 Proof.
