@@ -142,6 +142,7 @@ Inductive has_type : tm -> ta -> Prop :=
        |- iBool n \in Ety TBool High
   | T_And : forall t1 t2,
        |- t1 \in Ety TBool High ->
+       |- t1 \in Ety TBool Low ->
        |- t2 \in Ety TBool High ->
        |- iand t1 t2 \in Ety TBool High
   (*| T_Not : forall t1,
