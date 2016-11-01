@@ -146,48 +146,49 @@ Reserved Notation "'|-' t '\in' T" (at level 40).
 Inductive has_type : tm -> ta -> Prop :=
   | T_Bool : forall (n: bool) (s: sec),
        |- iBool n \in Ety TBool s
-  | T_And : forall t1 t2 (s: sec),
+  | T_And : forall (t1: tm) (t2:tm) (s: sec),
        |- t1 \in Ety TBool s ->
-       |- t2 \in Ety TBool s ->(* HH-> H, HL->H, LH->H ||| But LL->L case is not handled here*)         |- iand t1 t2 \in Ety TBool s
-   | T_Not : forall t1 (s: sec),
+       |- t2 \in Ety TBool s ->(* HL->H, LH->H case is not handled here*)
+       |- iand t1 t2 \in Ety TBool s
+   | T_Not : forall (t1: tm) (t2:tm) (s: sec),
        |- t1 \in Ety TBool s ->
        |- inot t1 \in Ety TBool s
-   | T_Eq : forall t1 t2 (s: sec),
+   | T_Eq : forall (t1: tm) (t2:tm) (s: sec),
        |- t1 \in Ety TNat s ->
        |- t2 \in Ety TNat s ->
        |- ieq t1 t2 \in Ety TBool s
-   | T_Ble : forall t1 t2 (s: sec),
+   | T_Ble : forall (t1: tm) (t2:tm) (s: sec),
        |- t1 \in Ety TNat s ->
        |- t2 \in Ety TNat s ->
        |- ible t1 t2 \in Ety TBool s 
    | T_Num : forall (n:nat) (s: sec),
        |- iNum n \in Ety TNat s   (* Does this stand true to the concept? n:nat still does not have a security label => we have directly assumed TNat as high*)          
-   | T_Plus : forall t1 t2 (s: sec),
+   | T_Plus : forall (t1: tm) (t2:tm) (s: sec),
        |- t1 \in Ety TNat s->
        |- t2 \in Ety TNat s->
        |- iplus t1 t2 \in Ety TNat s
-   | T_Minus : forall t1 t2 (s: sec),
+   | T_Minus : forall (t1: tm) (t2:tm) (s: sec),
        |- t1 \in Ety TNat s->
        |- t2 \in Ety TNat s->
        |- iminus t1 t2 \in Ety TNat s
-   | T_Mult : forall t1 t2 (s: sec),
+   | T_Mult : forall (t1: tm) (t2:tm) (s: sec),
        |- t1 \in Ety TNat s->
        |- t2 \in Ety TNat s->
        |- imult t1 t2 \in Ety TNat s
    | T_Id : forall (n: id) (t: ty) (s: sec),
        |- iId n \in TId t s                
-   | T_Skip :
-       |- iskip \in TCom Low (* Verify if skip is a low security operation from Prof*)
-   | T_Ass : forall t1 t2 (t: ty) (s: sec),
+   | T_Skip : forall (s:sec),
+       |- iskip \in TCom s (* Verify about flow in skip*)
+   | T_Ass : forall (t1: tm) (t2:tm) (t: ty) (s: sec),
        |- t1 \in (TId t) s->
        |- t2 \in Ety t s->
        |- iass t1 t2 \in TCom s 
-   | T_If : forall t1 t2 t3 (s:sec),
+   | T_If : forall (t1: tm) (t2:tm) (t3: tm) (s:sec),
        |- t1 \in Ety TBool s->
        |- t2 \in TCom s->          
        |- t3 \in TCom s->
        |- iif t1 t2 t3 \in TCom s
-   | T_While : forall t1 t2 (s: sec) ,
+   | T_While : forall (t1: tm) (t2:tm) (s: sec) ,
        |- t1 \in Ety TBool s ->
        |- t2 \in TCom s ->
        |- iwhile t1 t2 \in TCom s
