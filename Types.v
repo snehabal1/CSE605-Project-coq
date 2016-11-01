@@ -154,14 +154,14 @@ Inductive has_type : tm -> ta -> Prop :=
   | T_Ble : forall t1 t2,
        |- t1 \in Ety TNat ->
        |- t2 \in Ety TNat ->
-       |- ible t1 t2 \in Ety TBool
+       |- ible t1 t2 \in Ety TBool *)
   | T_Num : forall n:nat,
-      |- iNum n \in Ety TNat              
+      |- iNum n \in Ety TNat High             
   | T_Plus : forall t1 t2,
-       |- t1 \in Ety TNat ->
-       |- t2 \in Ety TNat ->
-       |- iplus t1 t2 \in Ety TNat
-  | T_Minus : forall t1 t2,
+       |- t1 \in Ety TNat High->
+       |- t2 \in Ety TNat High->
+       |- iplus t1 t2 \in Ety TNat High
+  (*| T_Minus : forall t1 t2,
        |- t1 \in Ety TNat ->
        |- t2 \in Ety TNat ->
        |- iminus t1 t2 \in Ety TNat
@@ -176,13 +176,13 @@ Inductive has_type : tm -> ta -> Prop :=
   | T_Ass : forall t1 t2 (s: ty),
        |- t1 \in (TId s) ->
        |- t2 \in Ety s ->
-       |- iass t1 t2 \in TCom
+       |- iass t1 t2 \in TCom *)
   | T_If : forall t1 t2 t3,
-       |- t1 \in Ety TBool ->
-       |- t2 \in TCom ->          
-       |- t3 \in TCom ->
-       |- iif t1 t2 t3 \in TCom
-  | T_While : forall t1 t2 ,
+       |- t1 \in Ety TBool High->
+       |- t2 \in TCom High->          
+       |- t3 \in TCom High->
+       |- iif t1 t2 t3 \in TCom High
+ (* | T_While : forall t1 t2 ,
        |- t1 \in Ety TBool ->
        |- t2 \in TCom ->
        |- iwhile t1 t2 \in TCom *)
