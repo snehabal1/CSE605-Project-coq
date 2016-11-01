@@ -126,7 +126,13 @@ Inductive ta : Type :=
   | TCom : sec -> ta
   | TId : ty -> sec -> ta.
 
+(*
+Inductive prod (A B:Type) : Type :=
+  pair : A -> B -> prod A B.
 
+
+Notation "( x , y , .. , z )" := (pair .. (pair x y) .. z) : core_scope.
+*)
 Check Ety TBool.
 (** In informal notation, the typing relation is often written
     [|- t \in T] and pronounced "[t] has type [T]."  The [|-] symbol
@@ -136,60 +142,67 @@ Check Ety TBool.
     is always empty. *)
 
 Reserved Notation "'|-' t '\in' T" (at level 40).
-
+(*subtyping low into high for further use, low and high as lattice, *)
 Inductive has_type : tm -> ta -> Prop :=
-  | T_Bool : forall n: bool,
-       |- iBool n \in Ety TBool High
-  | T_And : forall t1 t2,
-       |- t1 \in Ety TBool High ->
-       |- t1 \in Ety TBool Low ->
-       |- t2 \in Ety TBool High ->
-       |- iand t1 t2 \in Ety TBool High
-  (*| T_Not : forall t1,
-       |- t1 \in Ety TBool ->
-       |- inot t1 \in Ety TBool
-  | T_Eq : forall t1 t2,
-       |- t1 \in Ety TNat ->
-       |- t2 \in Ety TNat ->
-       |- ieq t1 t2 \in Ety TBool
-  | T_Ble : forall t1 t2,
-       |- t1 \in Ety TNat ->
-       |- t2 \in Ety TNat ->
-       |- ible t1 t2 \in Ety TBool *)
-  | T_Num : forall n:nat,
-      |- iNum n \in Ety TNat High             
-  | T_Plus : forall t1 t2,
-       |- t1 \in Ety TNat High->
-       |- t2 \in Ety TNat High->
-       |- iplus t1 t2 \in Ety TNat High
-  (*| T_Minus : forall t1 t2,
-       |- t1 \in Ety TNat ->
-       |- t2 \in Ety TNat ->
-       |- iminus t1 t2 \in Ety TNat
-  | T_Mult : forall t1 t2,
-       |- t1 \in Ety TNat ->
-       |- t2 \in Ety TNat ->
-       |- imult t1 t2 \in Ety TNat
-  | T_Id : forall (n: id) (s: ty),
-      |- iId n \in TId s                
-  | T_Skip :
-       |- iskip \in TCom
-  | T_Ass : forall t1 t2 (s: ty),
-       |- t1 \in (TId s) ->
-       |- t2 \in Ety s ->
-       |- iass t1 t2 \in TCom *)
-  | T_If : forall t1 t2 t3,
-       |- t1 \in Ety TBool High->
-       |- t2 \in TCom High->          
-       |- t3 \in TCom High->
-       |- iif t1 t2 t3 \in TCom High
- (* | T_While : forall t1 t2 ,
-       |- t1 \in Ety TBool ->
-       |- t2 \in TCom ->
-       |- iwhile t1 t2 \in TCom *)
+  | T_Bool : forall (n: bool) (s: sec),
+       |- iBool n \in Ety TBool s
+  | T_And : forall t1 t2 (s: sec),
+       |- t1 \in Ety TBool s ->
+       |- t2 \in Ety TBool s ->(* HH-> H, HL->H, LH->H ||| But LL->L case is not handled here*)         |- iand t1 t2 \in Ety TBool s
+   | T_Not : forall t1 (s: sec),
+       |- t1 \in Ety TBool s ->
+       |- inot t1 \in Ety TBool s
+   | T_Eq : forall t1 t2 (s: sec),
+       |- t1 \in Ety TNat s ->
+       |- t2 \in Ety TNat s ->
+       |- ieq t1 t2 \in Ety TBool s
+   | T_Ble : forall t1 t2 (s: sec),
+       |- t1 \in Ety TNat s ->
+       |- t2 \in Ety TNat s ->
+       |- ible t1 t2 \in Ety TBool s 
+   | T_Num : forall (n:nat) (s: sec),
+       |- iNum n \in Ety TNat s   (* Does this stand true to the concept? n:nat still does not have a security label => we have directly assumed TNat as high*)          
+   | T_Plus : forall t1 t2 (s: sec),
+       |- t1 \in Ety TNat s->
+       |- t2 \in Ety TNat s->
+       |- iplus t1 t2 \in Ety TNat s
+   | T_Minus : forall t1 t2 (s: sec),
+       |- t1 \in Ety TNat s->
+       |- t2 \in Ety TNat s->
+       |- iminus t1 t2 \in Ety TNat s
+   | T_Mult : forall t1 t2 (s: sec),
+       |- t1 \in Ety TNat s->
+       |- t2 \in Ety TNat s->
+       |- imult t1 t2 \in Ety TNat s
+   | T_Id : forall (n: id) (t: ty) (s: sec),
+       |- iId n \in TId t s                
+   | T_Skip :
+       |- iskip \in TCom Low (* Verify if skip is a low security operation from Prof*)
+   | T_Ass : forall t1 t2 (t: ty) (s: sec),
+       |- t1 \in (TId t) s->
+       |- t2 \in Ety t s->
+       |- iass t1 t2 \in TCom s 
+   | T_If : forall t1 t2 t3 (s:sec),
+       |- t1 \in Ety TBool s->
+       |- t2 \in TCom s->          
+       |- t3 \in TCom s->
+       |- iif t1 t2 t3 \in TCom s
+   | T_While : forall t1 t2 (s: sec) ,
+       |- t1 \in Ety TBool s ->
+       |- t2 \in TCom s ->
+       |- iwhile t1 t2 \in TCom s
 where "'|-' t '\in' T" := (has_type t T).
 
 Check iif (iBool true) (iNum 5) (iNum 4).
+
+Example type_not_if :
+  ~ ( |- iif (iNum 4) iskip iskip \in TCom).
+Proof.      
+unfold not. intros.
+inversion H.
+inversion H3.
+Qed.
+
 
 Example has_bool :
 |- (iBool true) \in Ety TBool.
@@ -281,6 +294,7 @@ Proof.
   Qed.
 Check iass (iass (iId (Id 0)) (iNum 5)) (iass (iId (Id 0)) (iNum 6)).
 
+
 Example test_not_iif :
 ~ (|- iif (iNum 4) iskip iskip \in TCom).
 Proof.
@@ -289,12 +303,22 @@ inversion H.
 inversion H3.
 Qed.
 
+
+(*
+
 Example has_not_ass :
 ~ (|- iass (iass (iId (Id 0)) (iNum 5)) (iass (iId (Id 0)) (iNum 6)) \in TCom).
 Proof.
+
 unfold not.
 intros.
 inversion H.
 inversion H2.
 Qed.
+
+
+  apply T_Ass with (s:= TNat).
+  apply T_Id.
+  apply T_Num.
+  Qed.*)
 
