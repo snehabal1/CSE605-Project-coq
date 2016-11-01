@@ -112,26 +112,20 @@ where "t1 '==>' t2" := (step t1 t2).
     _typing relation_ that relates terms to the types (either numeric
     or boolean) of their final results.  *)
 
-Inductive Sec : Type :=
-  | High : Sec
-  | Low : Sec.
+Inductive sec : Type :=
+  | High : sec
+  | Low : sec.
             
 Inductive ty : Type :=
   | TBool : ty
   | TNat : ty.
 
-<<<<<<< Updated upstream
 
 Inductive ta : Type :=
-  | Ety : ty -> ta
-  | TCom : ta
-  | TId : ty -> ta.
-=======
-Inductive tc : Type :=
-  | Ety : ty -> tc
-  | TCom : tc
-  | TId : ty -> tc.
->>>>>>> Stashed changes
+  | Ety : ty -> sec -> ta
+  | TCom : sec -> ta
+  | TId : ty -> sec -> ta.
+
 
 Check Ety TBool.
 (** In informal notation, the typing relation is often written
@@ -145,12 +139,12 @@ Reserved Notation "'|-' t '\in' T" (at level 40).
 
 Inductive has_type : tm -> ta -> Prop :=
   | T_Bool : forall n: bool,
-       |- iBool n \in Ety TBool
+       |- iBool n \in Ety TBool High
   | T_And : forall t1 t2,
-       |- t1 \in Ety TBool ->
-       |- t2 \in Ety TBool ->
-       |- iand t1 t2 \in Ety TBool
-  | T_Not : forall t1,
+       |- t1 \in Ety TBool High ->
+       |- t2 \in Ety TBool High ->
+       |- iand t1 t2 \in Ety TBool High
+  (*| T_Not : forall t1,
        |- t1 \in Ety TBool ->
        |- inot t1 \in Ety TBool
   | T_Eq : forall t1 t2,
@@ -191,12 +185,11 @@ Inductive has_type : tm -> ta -> Prop :=
   | T_While : forall t1 t2 ,
        |- t1 \in Ety TBool ->
        |- t2 \in TCom ->
-       |- iwhile t1 t2 \in TCom
+       |- iwhile t1 t2 \in TCom *)
 where "'|-' t '\in' T" := (has_type t T).
 
 Check iif (iBool true) (iNum 5) (iNum 4).
 
-<<<<<<< Updated upstream
 Example has_bool :
 |- (iBool true) \in Ety TBool.
 Proof.
@@ -264,8 +257,6 @@ Proof.
     - apply T_Num.
 Qed.
  
-=======
->>>>>>> Stashed changes
 Example has_type_not :
 |- (iif (iBool true) (iass (iId (Id 0)) (iNum 5)) (iass (iId (Id 0)) (iNum 4))) \in TCom.
 Proof.
@@ -289,10 +280,20 @@ Proof.
   Qed.
 Check iass (iass (iId (Id 0)) (iNum 5)) (iass (iId (Id 0)) (iNum 6)).
 
-Example has_not_ass :
-|- (iass (iass (iId (Id 0)) (iNum 5)) (iass (iId (Id 0)) (iNum 6))) \in TCom.
+Example test_not_iif :
+~ (|- iif (iNum 4) iskip iskip \in TCom).
 Proof.
-  apply T_Ass with (s:= TNat).
-  apply T_Id.
-  apply T_Num.
-  Qed.
+unfold not. intros.
+inversion H.
+inversion H3.
+Qed.
+
+Example has_not_ass :
+~ (|- iass (iass (iId (Id 0)) (iNum 5)) (iass (iId (Id 0)) (iNum 6)) \in TCom).
+Proof.
+unfold not.
+intros.
+inversion H.
+inversion H2.
+Qed.
+
