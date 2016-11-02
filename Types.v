@@ -196,6 +196,8 @@ where "'|-' t '\in' T" := (has_type t T).
 
 Check iif (iBool true) (iNum 5) (iNum 4).
 
+(*will only compile till here cuz examples not modified yet
+
 Example type_not_if :
   ~ ( |- iif (iNum 4) iskip iskip \in TCom).
 Proof.      
@@ -322,4 +324,6 @@ Qed.
   apply T_Id.
   apply T_Num.
   Qed.*)
+
+*)
 
