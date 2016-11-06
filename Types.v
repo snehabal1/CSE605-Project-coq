@@ -61,6 +61,8 @@ Inductive tm : Type :=
   | iskip : tm
   | iass : tm -> tm ->tm
   | iif : tm -> tm -> tm -> tm
+  | ibind : tm -> tm -> tm
+  | imeet : tm-> tm -> tm                        
   | iwhile : tm -> tm -> tm.                           
 
 (*
@@ -120,7 +122,6 @@ Inductive ty : Type :=
   | TBool : ty
   | TNat : ty.
 
-
 Inductive ta : Type :=
   | Ety : ty -> sec -> ta
   | TCom : sec -> ta
@@ -129,7 +130,6 @@ Inductive ta : Type :=
 (*
 Inductive prod (A B:Type) : Type :=
   pair : A -> B -> prod A B.
-
 
 Notation "( x , y , .. , z )" := (pair .. (pair x y) .. z) : core_scope.
 *)
@@ -162,7 +162,7 @@ Inductive has_type : tm -> ta -> Prop :=
        |- t2 \in Ety TNat s ->
        |- ible t1 t2 \in Ety TBool s 
    | T_Num : forall (n:nat) (s: sec),
-       |- iNum n \in Ety TNat s   (* Does this stand true to the concept? n:nat still does not have a security label => we have directly assumed TNat as high*)          
+       |- iNum n \in Ety TNat s            
    | T_Plus : forall (t1: tm) (t2:tm) (s: sec),
        |- t1 \in Ety TNat s->
        |- t2 \in Ety TNat s->
@@ -192,6 +192,14 @@ Inductive has_type : tm -> ta -> Prop :=
        |- t1 \in Ety TBool s ->
        |- t2 \in TCom s ->
        |- iwhile t1 t2 \in TCom s
+   | T_bind : forall (t1: tm) (t2: tm) (s: sec) (s': sec),
+       |- t1 \in TCom s' ->(*If t1 Low/High*)
+       |- t2 \in TCom s -> (*If t2 High*)
+       |- ibind t1 t2 \in TCom s
+   | T_meet : forall (t1: tm) (t2: tm) (s: sec),
+       |- t1 \in TCom s' ->
+       |- t2 \in TCom s -> 
+       |- imeet t1 t2 \in TCom s
 where "'|-' t '\in' T" := (has_type t T).
 
 Check iif (iBool true) (iNum 5) (iNum 4).
