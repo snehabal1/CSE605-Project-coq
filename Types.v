@@ -49,6 +49,7 @@ Hint Constructors multi.
 
 Inductive tm : Type :=
   | iBool : bool -> tm
+  | ior : tm -> tm -> tm                  
   | iand : tm -> tm -> tm (*added for imp maybe change tand to impand*)
   | inot : tm-> tm
   | ieq : tm -> tm -> tm
@@ -145,12 +146,16 @@ Check Ety TBool.
 Reserved Notation "'|-' t '\in' T" (at level 40).
 (*subtyping low into high for further use, low and high as lattice, *)
 Inductive has_type : tm -> ta -> Prop :=
-  | T_Bool : forall (n: bool) (s: sec),
+   | T_Bool : forall (n: bool) (s: sec),
        |- iBool n \in Ety TBool s
-  | T_And : forall (t1: tm) (t2:tm) (s: sec),
+   | T_And : forall (t1: tm) (t2:tm) (s: sec),
        |- t1 \in Ety TBool s ->
-       |- t2 \in Ety TBool s ->(* HL->H, LH->H case is not handled here*)
+       |- t2 \in Ety TBool s ->
        |- iand t1 t2 \in Ety TBool s
+   | T_Or : forall (t1 :tm) (t2: tm) (s: sec),
+       |- t1 \in Ety TBool s ->
+       |- t2 \in Ety TBool s ->
+       |- ior t1 t2 \in Ety TBool s
    | T_Not : forall (t1: tm) (t2:tm) (s: sec),
        |- t1 \in Ety TBool s ->
        |- inot t1 \in Ety TBool s
@@ -200,7 +205,11 @@ Inductive has_type : tm -> ta -> Prop :=
    | T_meet : forall (t1: tm) (t2: tm) (s: sec),
        |- t1 \in TCom s ->
        |- t2 \in TCom s ->
-       |- iand t1 t2 \in TCom s                    
+       |- imeet t1 t2 \in TCom s                    
+   | T_join : forall (t1: tm) (t2: tm) (s: sec),
+       |- t1 \in TCom s ->
+       |- t2 \in TCom s ->
+       |- ijoin t1 t2 \in TCom s 
 where "'|-' t '\in' T" := (has_type t T).
 (*Create a separate inductive type to define T_meet and T_join? *)
 Check iif (iBool true) (iNum 5) (iNum 4).
