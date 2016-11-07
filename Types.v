@@ -62,7 +62,8 @@ Inductive tm : Type :=
   | iass : tm -> tm ->tm
   | iif : tm -> tm -> tm -> tm
   | ibind : tm -> tm -> tm
-  | imeet : tm-> tm -> tm                        
+  | ijoin : tm -> tm -> tm
+  | imeet : tm -> tm -> tm                        
   | iwhile : tm -> tm -> tm.                           
 
 (*
@@ -197,11 +198,11 @@ Inductive has_type : tm -> ta -> Prop :=
        |- t2 \in TCom s -> (*If t2 High*)
        |- ibind t1 t2 \in TCom s
    | T_meet : forall (t1: tm) (t2: tm) (s: sec),
-       |- t1 \in TCom s' ->
-       |- t2 \in TCom s -> 
-       |- imeet t1 t2 \in TCom s
+       |- t1 \in TCom s ->
+       |- t2 \in TCom s ->
+       |- iand t1 t2 \in TCom s                    
 where "'|-' t '\in' T" := (has_type t T).
-
+(*Create a separate inductive type to define T_meet and T_join? *)
 Check iif (iBool true) (iNum 5) (iNum 4).
 
 (*will only compile till here cuz examples not modified yet
