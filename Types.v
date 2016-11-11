@@ -209,12 +209,15 @@ Inductive has_type : tm -> ta -> Prop :=
        |- t1 \in Ety TBool s ->
        |- t2 \in TCom s ->
        |- iwhile t1 t2 \in TCom s
-   | T_Lessthancom : forall (t: tm) (s: sec) (s': sec),
+   | T_LessthanCom : forall (t: tm) (s: sec) (s': sec),
        |- t \in TCom s -> less_equal_to s s' ->
        |- t \in TCom s'
-   | T_Lessthanid : forall (t: tm) (s: sec) (s': sec),
+   | T_LessthanNat : forall (t: tm) (s: sec) (s': sec),
        |- t \in Ety TNat s -> less_equal_to s s' ->
-       |- t \in Ety TNat s'      
+       |- t \in Ety TNat s'
+   | T_LessthanBool : forall (t: tm) (s: sec) (s': sec),
+       |- t \in Ety TBool s -> less_equal_to s s' ->
+       |- t \in Ety TBool s'                               
 (*  | T_meet : forall (t1: tm) (t2: tm) (s: sec),
        |- t1 \in TCom s ->
        |- t2 \in TCom s ->
@@ -231,18 +234,25 @@ Example type_skip :
   |- seq iskip iskip \in TCom High.
 Proof.      
   apply T_seq.
-  - apply T_Lessthancom with (s:=Low). apply T_Skip. apply Let_LH.
+  - apply T_LessthanCom with (s:=Low). apply T_Skip. apply Let_LH.
   - apply T_Skip.
 Qed.
 
-Example type_and_sec :
+Example type_plus_sec :
   |- iplus (iNum 1) (iNum 2) \in Ety TNat High.
 Proof.      
   apply T_Plus.
-  - apply T_Lessthanid with (s:= Low). apply T_Num. apply Let_LH.
+  - apply T_LessthanNat with (s:= Low). apply T_Num. apply Let_LH.
   - apply T_Num.
 Qed.
 
+Example type_and_sec :
+  |- iand (iBool true) (iBool true) \in Ety TBool High.
+Proof.      
+  apply T_And.
+  - apply T_LessthanBool with (s:= Low). apply T_Bool. apply Let_LH.
+  - apply T_Bool.
+Qed.
 
 (*Create a separate inductive type to define T_meet and T_join? *)
 Check iif (iBool true) (iNum 5) (iNum 4).
