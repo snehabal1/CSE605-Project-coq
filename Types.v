@@ -191,7 +191,7 @@ Inductive has_type : tm -> ta -> Prop :=
    | T_Id : forall (n: id) (t: ty) (s: sec),
        |- iId n \in TId t s                
    | T_Skip : forall (s:sec),
-r       |- iskip \in TCom s (* Verify about flow in skip*)
+       |- iskip \in TCom s (* Verify about flow in skip*)
    | T_Ass : forall (t1: tm) (t2:tm) (t: ty) (s: sec),
        |- t1 \in (TId t) s->
        |- t2 \in Ety t s->
@@ -212,16 +212,10 @@ r       |- iskip \in TCom s (* Verify about flow in skip*)
    | T_Lessthancom : forall (t: tm) (s: sec) (s': sec),
        |- t \in TCom s -> less_equal_to s s' ->
        |- t \in TCom s'
-   | T_Lessthanid : forall (t: tm) (t1: ty) (s: sec) (s': sec),
-       |- t \in (TId t1) s -> less_equal_to s s' ->
-       |- t \in (TId t1) s'
-                             
-  (* | T_bind : forall (t1: tm) (t2: tm) (s: sec) (s': sec),
-       |- t1 \in TCom s' ->
-       |- t2 \in TCom s ->
-       |- ibind t1 t2 \in TCom s *)
-                                
-(*   | T_meet : forall (t1: tm) (t2: tm) (s: sec),
+   | T_Lessthanid : forall (t: tm) (s: sec) (s': sec),
+       |- t \in Ety TNat s -> less_equal_to s s' ->
+       |- t \in Ety TNat s'      
+(*  | T_meet : forall (t1: tm) (t2: tm) (s: sec),
        |- t1 \in TCom s ->
        |- t2 \in TCom s ->
        |- imeet t1 t2 \in TCom s                    
@@ -245,8 +239,8 @@ Example type_and_sec :
   |- iplus (iNum 1) (iNum 2) \in Ety TNat High.
 Proof.      
   apply T_Plus.
-  - apply T_Lessthanid with (t1:= TNat). apply T_Plus. apply Let_LH.
-  - apply T_Skip.
+  - apply T_Lessthanid with (s:= Low). apply T_Num. apply Let_LH.
+  - apply T_Num.
 Qed.
 
 
