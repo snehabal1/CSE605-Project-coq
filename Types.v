@@ -163,7 +163,7 @@ Inductive has_type : tm -> ta -> Prop :=
        |- t1 \in Ety TBool s ->
        |- t2 \in Ety TBool s ->
        |- ior t1 t2 \in Ety TBool s
-   | T_Not : forall (t1: tm) (t2:tm) (s: sec),
+   | T_Not : forall (t1: tm) (s: sec),
        |- t1 \in Ety TBool s ->
        |- inot t1 \in Ety TBool s
    | T_Eq : forall (t1: tm) (t2:tm) (s: sec),
@@ -253,6 +253,15 @@ Proof.
   - apply T_LessthanBool with (s:= Low). apply T_Bool. apply Let_LH.
   - apply T_Bool.
 Qed.
+
+Example type_mult_sec :
+  |- imult (iNum 2) (iNum 3) \in Ety TNat High.
+Proof.      
+  apply T_Mult.
+  - apply T_LessthanNat with (s:= Low). apply T_Num. apply Let_LH.
+  - apply T_Num.
+Qed.
+
 
 (*Create a separate inductive type to define T_meet and T_join? *)
 Check iif (iBool true) (iNum 5) (iNum 4).
