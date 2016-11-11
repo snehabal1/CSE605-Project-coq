@@ -62,7 +62,8 @@ Inductive tm : Type :=
   | iskip : tm
   | iass : tm -> tm ->tm
   | iif : tm -> tm -> tm -> tm
-  | ibind : tm -> tm -> tm
+  | seq : tm -> tm -> tm                            
+  | ibind : tm -> tm
   | ijoin : tm -> tm -> tm
   | imeet : tm -> tm -> tm                        
   | iwhile : tm -> tm -> tm.                           
@@ -129,6 +130,12 @@ Inductive ta : Type :=
   | TCom : sec -> ta
   | TId : ty -> sec -> ta.
 
+Inductive less_equal_to : sec -> sec -> Prop :=
+| Let_HH : less_equal_to High High
+| Let_LL : less_equal_to Low Low
+| Let_LH : less_equal_to Low High.                        
+
+
 (*
 Inductive prod (A B:Type) : Type :=
   pair : A -> B -> prod A B.
@@ -184,11 +191,15 @@ Inductive has_type : tm -> ta -> Prop :=
    | T_Id : forall (n: id) (t: ty) (s: sec),
        |- iId n \in TId t s                
    | T_Skip : forall (s:sec),
-       |- iskip \in TCom s (* Verify about flow in skip*)
+r       |- iskip \in TCom s (* Verify about flow in skip*)
    | T_Ass : forall (t1: tm) (t2:tm) (t: ty) (s: sec),
        |- t1 \in (TId t) s->
        |- t2 \in Ety t s->
        |- iass t1 t2 \in TCom s 
+   | T_seq : forall (t1: tm) (t2:tm) (s:sec),
+       |- t1 \in TCom  s->
+       |- t2 \in TCom s->          
+       |- seq t1 t2 \in TCom s
    | T_If : forall (t1: tm) (t2:tm) (t3: tm) (s:sec),
        |- t1 \in Ety TBool s->
        |- t2 \in TCom s->          
@@ -198,19 +209,47 @@ Inductive has_type : tm -> ta -> Prop :=
        |- t1 \in Ety TBool s ->
        |- t2 \in TCom s ->
        |- iwhile t1 t2 \in TCom s
-   | T_bind : forall (t1: tm) (t2: tm) (s: sec) (s': sec),
-       |- t1 \in TCom s' ->(*If t1 Low/High*)
-       |- t2 \in TCom s -> (*If t2 High*)
-       |- ibind t1 t2 \in TCom s
-   | T_meet : forall (t1: tm) (t2: tm) (s: sec),
+   | T_Lessthancom : forall (t: tm) (s: sec) (s': sec),
+       |- t \in TCom s -> less_equal_to s s' ->
+       |- t \in TCom s'
+   | T_Lessthanid : forall (t: tm) (t1: ty) (s: sec) (s': sec),
+       |- t \in (TId t1) s -> less_equal_to s s' ->
+       |- t \in (TId t1) s'
+                             
+  (* | T_bind : forall (t1: tm) (t2: tm) (s: sec) (s': sec),
+       |- t1 \in TCom s' ->
+       |- t2 \in TCom s ->
+       |- ibind t1 t2 \in TCom s *)
+                                
+(*   | T_meet : forall (t1: tm) (t2: tm) (s: sec),
        |- t1 \in TCom s ->
        |- t2 \in TCom s ->
        |- imeet t1 t2 \in TCom s                    
    | T_join : forall (t1: tm) (t2: tm) (s: sec),
        |- t1 \in TCom s ->
        |- t2 \in TCom s ->
-       |- ijoin t1 t2 \in TCom s 
+                 |- ijoin t1 t2 \in TCom s *)
+                                    
 where "'|-' t '\in' T" := (has_type t T).
+
+
+Example type_skip :
+  |- seq iskip iskip \in TCom High.
+Proof.      
+  apply T_seq.
+  - apply T_Lessthancom with (s:=Low). apply T_Skip. apply Let_LH.
+  - apply T_Skip.
+Qed.
+
+Example type_and_sec :
+  |- iplus (iNum 1) (iNum 2) \in Ety TNat High.
+Proof.      
+  apply T_Plus.
+  - apply T_Lessthanid with (t1:= TNat). apply T_Plus. apply Let_LH.
+  - apply T_Skip.
+Qed.
+
+
 (*Create a separate inductive type to define T_meet and T_join? *)
 Check iif (iBool true) (iNum 5) (iNum 4).
 
