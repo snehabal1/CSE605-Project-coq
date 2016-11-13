@@ -63,50 +63,9 @@ Inductive tm : Type :=
   | iass : tm -> tm ->tm
   | iif : tm -> tm -> tm -> tm
   | seq : tm -> tm -> tm                            
-  | ibind : tm -> tm
-  | ijoin : tm -> tm -> tm
-  | imeet : tm -> tm -> tm                        
+  | ibind : tm -> tm                     
   | iwhile : tm -> tm -> tm.                           
-
-(*
-Reserved Notation "t1 '==>' t2" (at level 40).*)
-(*
-Inductive step : tm -> tm -> Prop :=
-  | ST_IfTrue : forall t1 t2,
-      (tif ttrue t1 t2) ==> t1
-  | ST_IfFalse : forall t1 t2,
-      (tif tfalse t1 t2) ==> t2
-  | ST_If : forall t1 t1' t2 t3,
-      t1 ==> t1' ->
-      (tif t1 t2 t3) ==> (tif t1' t2 t3)
-  | ST_Succ : forall t1 t1',
-      t1 ==> t1' ->
-      (tsucc t1) ==> (tsucc t1')
-  | ST_PredZero :
-      (tpred tzero) ==> tzero
-  | ST_PredSucc : forall t1,
-      nvalue t1 ->
-      (tpred (tsucc t1)) ==> t1
-  | ST_Pred : forall t1 t1',
-      t1 ==> t1' ->
-      (tpred t1) ==> (tpred t1')
-  | ST_IszeroZero :
-      (tiszero tzero) ==> ttrue
-  | ST_IszeroSucc : forall t1,
-       nvalue t1 ->
-      (tiszero (tsucc t1)) ==> tfalse
-  | ST_Iszero : forall t1 t1',
-      t1 ==> t1' ->
-      (tiszero t1) ==> (tiszero t1')
-  | ST_impand : forall t1 t2 t3 ,
-      (tif tfalse t1) ==> tfalse
-      (tif ttrue t1)==> (tif false t2) ==> tfalse
-      ( 
-    
-
-where "t1 '==>' t2" := (step t1 t2).
-
- *)
+   
 (* ================================================================= *)
 (** ** Typing *)
 
@@ -134,7 +93,15 @@ Inductive less_equal_to : sec -> sec -> Prop :=
 | Let_HH : less_equal_to High High
 | Let_LL : less_equal_to Low Low
 | Let_LH : less_equal_to Low High.                        
+(*
+Reserved Notation "'|-' t '\in' T" (at level 40).
+Inductive lattice_meet : sec -> sec -> Prop :=
+| Lat_LL_meet : forall (t1: sec) (t2: sec),
+    |- t1 \in Low ->
+    |- t2 \in Low ->
+    |- lattice_meet t1 t2 \in Low
 
+where "'|-' t '\in' T" := (lattice_meet t T).   *)                                
 
 (*
 Inductive prod (A B:Type) : Type :=
@@ -218,14 +185,6 @@ Inductive has_type : tm -> ta -> Prop :=
    | T_LessthanBool : forall (t: tm) (s: sec) (s': sec),
        |- t \in Ety TBool s -> less_equal_to s s' ->
        |- t \in Ety TBool s'                               
-(*  | T_meet : forall (t1: tm) (t2: tm) (s: sec),
-       |- t1 \in TCom s ->
-       |- t2 \in TCom s ->
-       |- imeet t1 t2 \in TCom s                    
-   | T_join : forall (t1: tm) (t2: tm) (s: sec),
-       |- t1 \in TCom s ->
-       |- t2 \in TCom s ->
-                 |- ijoin t1 t2 \in TCom s *)
                                     
 where "'|-' t '\in' T" := (has_type t T).
 
