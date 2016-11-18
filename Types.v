@@ -128,6 +128,25 @@ Check Ety TBool.
     written to the left of the turnstile.  For the moment, the context
     is always empty. *)
 
+Inductive subtype: ta-> ta-> Prop :=
+ | S_Base : forall (s s': sec) (a a': ty),
+     less_equal_to s s' -> a=a' ->
+     subtype (Ety a s) (Ety a' s').
+
+Example newt : subtype ( Ety TNat Low) ( Ety TNat High).
+Proof.
+apply S_Base.
+- constructor.
+- reflexivity.
+Qed.
+
+Example newtn : ~ (subtype ( Ety TNat Low) ( Ety TBool High) ).
+Proof. 
+unfold not.
+intros.
+inversion H.
+inversion H5.
+
 Reserved Notation "'|-' t '\in' T" (at level 40).
 (*subtyping low into high for further use, low and high as lattice, *)
 Inductive has_type : tm -> ta -> Prop :=
