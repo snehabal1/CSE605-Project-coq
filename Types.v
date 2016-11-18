@@ -179,14 +179,84 @@ Inductive has_type : tm -> ta -> Prop :=
    | T_LessthanCom : forall (t: tm) (s: sec) (s': sec),
        |- t \in TCom s -> less_equal_to s s' ->
        |- t \in TCom s'
-   | T_LessthanNat : forall (t: tm) (s: sec) (s': sec),
+   | T_LessthanEty : forall (t: tm) (t1: ty) (s: sec) (s': sec),
+       |- t \in Ety t1 s -> less_equal_to s s' ->
+       |- t \in Ety t1 s'
+   (*| T_LessthanNat : forall (t: tm) (s: sec) (s': sec),
        |- t \in Ety TNat s -> less_equal_to s s' ->
        |- t \in Ety TNat s'
    | T_LessthanBool : forall (t: tm) (s: sec) (s': sec),
        |- t \in Ety TBool s -> less_equal_to s s' ->
-       |- t \in Ety TBool s'                               
+       |- t \in Ety TBool s'*)
+   | T_LessthanId : forall (t: tm) (t1: ty) (s: sec) (s': sec),
+       |- t \in TId t1 s -> less_equal_to s s' ->
+       |- t \in TId t1 s'
                                     
 where "'|-' t '\in' T" := (has_type t T).
+
+Example type_id_sec :
+  |- iId (Id 0) \in TId TNat High.
+Proof.
+apply T_LessthanId with (s:= Low).
+- apply T_Id.
+- apply Let_LH.
+Qed.
+
+Example type_ass_sec :
+  |- (iass (iId (Id 0)) (iNum 5)) \in TCom High.
+Proof.
+apply T_Ass with (t:= TNat).
+- apply T_LessthanId with (s:= Low).
+ + apply T_Id.
+ + apply Let_LH.
+- apply T_Num.
+
+Example type_if_sec :
+  |- iif (iBool true) (iskip) (iass (iId (Id 0)) (iNum 5)) \in TCom High.
+Proof.
+apply T_If.
+- apply T_LessthanEty with (s:= Low). apply T_Bool. apply Let_LH.
+- apply T_LessthanCom with (s:=Low). apply T_Skip. apply Let_LH.
+- apply T_LessthanCom with (s:=Low). apply T_Ass with (t:= TNat). apply T_Id. apply T_Num. apply Let_LH.
+Qed.
+
+Example type_bool_sec :
+  |- iBool true \in Ety TBool High.
+Proof.
+apply T_LessthanEty with (s:= Low).
+- apply T_Bool.
+- apply Let_LH.
+Qed.
+
+Example type_and_sec :
+  |- iand (iBool true) (iBool true) \in Ety TBool High.
+Proof.      
+  apply T_And.
+  - apply T_LessthanEty with (s:= Low). apply T_Bool. apply Let_LH.
+  - apply T_Bool.
+Qed.
+
+Example type_not_sec :
+  |- inot (iBool true) \in Ety TBool High.
+Proof.
+apply T_LessthanEty with (s:= Low).
+- apply T_Not. apply T_Bool.
+- apply Let_LH.
+
+Example type_num_sec :
+  |- iNum 4 \in Ety TNat High.
+Proof.
+apply T_LessthanEty with (s:= Low).
+- apply T_Num. 
+- apply Let_LH.
+
+Example type_plus_sec :
+  |- iplus (iNum 1) (iNum 2) \in Ety TNat High.
+Proof.      
+  apply T_Plus.
+  - apply T_LessthanEty with (s:= Low). apply T_Num. apply Let_LH.
+  - apply T_LessthanEty with (s:= Low). apply T_Num. apply Let_LH.
+Qed.
 
 
 Example type_skip :
@@ -197,27 +267,12 @@ Proof.
   - apply T_Skip.
 Qed.
 
-Example type_plus_sec :
-  |- iplus (iNum 1) (iNum 2) \in Ety TNat High.
-Proof.      
-  apply T_Plus.
-  - apply T_LessthanNat with (s:= Low). apply T_Num. apply Let_LH.
-  - apply T_Num.
-Qed.
-
-Example type_and_sec :
-  |- iand (iBool true) (iBool true) \in Ety TBool High.
-Proof.      
-  apply T_And.
-  - apply T_LessthanBool with (s:= Low). apply T_Bool. apply Let_LH.
-  - apply T_Bool.
-Qed.
 
 Example type_mult_sec :
   |- imult (iNum 2) (iNum 3) \in Ety TNat High.
 Proof.      
   apply T_Mult.
-  - apply T_LessthanNat with (s:= Low). apply T_Num. apply Let_LH.
+  - apply T_LessthanEty with (s:= Low). apply T_Num. apply Let_LH.
   - apply T_Num.
 Qed.
 
