@@ -62,8 +62,7 @@ Inductive tm : Type :=
   | iskip : tm
   | iass : tm -> tm ->tm
   | iif : tm -> tm -> tm -> tm
-  | seq : tm -> tm -> tm                            
-  | ibind : tm -> tm                     
+  | seq : tm -> tm -> tm                                                
   | iwhile : tm -> tm -> tm.                           
    
 (* ================================================================= *)
@@ -92,7 +91,19 @@ Inductive ta : Type :=
 Inductive less_equal_to : sec -> sec -> Prop :=
 | Let_HH : less_equal_to High High
 | Let_LL : less_equal_to Low Low
-| Let_LH : less_equal_to Low High.                        
+| Let_LH : less_equal_to Low High.
+
+Definition meet (l h:sec) : sec :=
+  match l, h with
+  |Low, High => Low
+  |High, Low => Low
+  |High, High => High
+  |Low, Low => Low
+  end.
+       
+Compute meet High High.
+Example test_meet: (meet High High) = High.
+Proof. simpl. reflexivity.  Qed.                 
 (*
 Reserved Notation "'|-' t '\in' T" (at level 40).
 Inductive lattice_meet : sec -> sec -> Prop :=
