@@ -131,20 +131,27 @@ Check Ety TBool.
 Inductive subtype: ta-> ta-> Prop :=
  | S_Base : forall (s s': sec) (a a': ty),
      less_equal_to s s' -> a=a' ->
-     subtype (Ety a s) (Ety a' s') ->
-     subtype (TCom s) (TCom s')
+     subtype (Ety a s) (Ety a' s')
  | S_Reflex : forall (s: sec) (a: ty),
-     subtype (TCom s) (TCom s)->
-     subtype (Ety a s) (Ety a s)
+     subtype (Ety a s) (Ety a s)->
+     subtype (TId a s) (TId a s)->
+     subtype (TCom s) (TCom s)
  | S_Trans : forall (s s' s1 : sec) (a a' a1 : ty),
      subtype (Ety a s) (Ety a' s') ->
+     subtype (TId a s) (TId a' s') ->
      subtype (TCom s) (TCom s')->
      subtype (Ety a' s') (Ety a1 s1) ->
+     subtype (TId a' s') (TId a1 s1) ->
      subtype (TCom s') (TCom s1)->
      subtype (Ety a s) (Ety a1 s1) ->
-     subtype (TCom s) (TCom s1).
+     subtype (TId a s) (TId a1 s1) ->
+     subtype (TCom s) (TCom s1)
  | S_Cmd : forall (s s': sec) (a a': ty),
-     
+     subtype (Ety a s) (Ety a' s') ->
+     subtype (TCom s') (TCom s) .
+
+(* the last one is like if phrase p hast type rho and rho is subtype of rho', phrase p has type rho' so can't implement
+ here cuz it would be term "tm" this will just follow based on the four subtype rules here.  *)
 
 
 Example newt : subtype ( Ety TNat Low) ( Ety TNat High).
