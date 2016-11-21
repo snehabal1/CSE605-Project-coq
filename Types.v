@@ -132,12 +132,16 @@ Inductive subtype: ta-> ta-> Prop :=
  | S_Base : forall (s s': sec) (a a': ty),
      less_equal_to s s' -> a=a' ->
      subtype (Ety a s) (Ety a' s')
- | S_Reflex : forall (s: sec) (a: ty),
-     subtype (Ety a s) (Ety a s)->
+ | S_Reflex : forall (a:ta),
+     subtype a a 
+     (*subtype (Ety a s) (Ety a s)->
      subtype (TId a s) (TId a s)->
-     subtype (TCom s) (TCom s)
- | S_Trans : forall (s s' s1 : sec) (a a' a1 : ty),
-     subtype (Ety a s) (Ety a' s') ->
+     subtype (TCom s) (TCom s)*)
+ | S_Trans : forall (a b c:ta),
+     subtype a b ->
+     subtype b c ->
+     subtype a c
+     (*subtype (Ety a s) (Ety a' s') ->
      subtype (TId a s) (TId a' s') ->
      subtype (TCom s) (TCom s')->
      subtype (Ety a' s') (Ety a1 s1) ->
@@ -145,9 +149,9 @@ Inductive subtype: ta-> ta-> Prop :=
      subtype (TCom s') (TCom s1)->
      subtype (Ety a s) (Ety a1 s1) ->
      subtype (TId a s) (TId a1 s1) ->
-     subtype (TCom s) (TCom s1)
+     subtype (TCom s) (TCom s1)*)
  | S_Cmd : forall (s s': sec) (a a': ty),
-     subtype (Ety a s) (Ety a' s') ->
+     less_equal_to s s' ->
      subtype (TCom s') (TCom s) .
 
 (* the last one is like if phrase p hast type rho and rho is subtype of rho', phrase p has type rho' so can't implement
@@ -242,8 +246,32 @@ Inductive has_type : tm -> ta -> Prop :=
    | T_LessthanId : forall (t: tm) (t1: ty) (s: sec) (s': sec),
        |- t \in TId t1 s -> less_equal_to s s' ->
        |- t \in TId t1 s'
+   | T_Subtype_rule : forall (t:tm) (a a':ta),
+       |- t \in a -> subtype a a' ->
+       |- t \in a'
                                     
 where "'|-' t '\in' T" := (has_type t T).
+
+Example subtype_in:
+  |- iNum 4 \in Ety TNat High.
+Proof.
+apply T_Subtype_rule with (a:= Ety TNat Low). 
+- apply T_Num.
+- apply S_Base.
+  + constructor.
+  + reflexivity.
+Qed.
+
+Example subtype_if :
+  |- iif (iBool true) (iskip) (iass (iId (Id 0)) (iNum 5)) \in TCom High.
+Proof.
+apply T_Subtype_rule with (a:= TCom Low).
+- apply T_If.
+ +constructor.
+ +constructor.
+ + apply T_Ass with (t:= TNat).
+   * apply T_Id with (t:TNat).
+
 
 Example type_id_sec :
   |- iId (Id 0) \in TId TNat High.
