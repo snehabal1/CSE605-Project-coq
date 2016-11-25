@@ -100,26 +100,19 @@ Definition meet (l h:sec) : sec :=
   |High, High => High
   |Low, Low => Low
   end.
-       
+
+Definition join (l h:sec) : sec :=
+  match l, h with
+  |Low, High => High
+  |High, Low => High
+  |High, High => High
+  |Low, Low => Low
+  end.
+
 Compute meet High High.
 Example test_meet: (meet High High) = High.
 Proof. simpl. reflexivity.  Qed.                 
-(*
-Reserved Notation "'|-' t '\in' T" (at level 40).
-Inductive lattice_meet : sec -> sec -> Prop :=
-| Lat_LL_meet : forall (t1: sec) (t2: sec),
-    |- t1 \in Low ->
-    |- t2 \in Low ->
-    |- lattice_meet t1 t2 \in Low
-
-where "'|-' t '\in' T" := (lattice_meet t T).   *)                                
-
-(*
-Inductive prod (A B:Type) : Type :=
-  pair : A -> B -> prod A B.
-
-Notation "( x , y , .. , z )" := (pair .. (pair x y) .. z) : core_scope.
-*)
+                              
 Check Ety TBool.
 (** In informal notation, the typing relation is often written
     [|- t \in T] and pronounced "[t] has type [T]."  The [|-] symbol
@@ -134,29 +127,16 @@ Inductive subtype: ta-> ta-> Prop :=
      subtype (Ety a s) (Ety a' s')
  | S_Reflex : forall (a:ta),
      subtype a a 
-     (*subtype (Ety a s) (Ety a s)->
-     subtype (TId a s) (TId a s)->
-     subtype (TCom s) (TCom s)*)
  | S_Trans : forall (a b c:ta),
      subtype a b ->
      subtype b c ->
      subtype a c
-     (*subtype (Ety a s) (Ety a' s') ->
-     subtype (TId a s) (TId a' s') ->
-     subtype (TCom s) (TCom s')->
-     subtype (Ety a' s') (Ety a1 s1) ->
-     subtype (TId a' s') (TId a1 s1) ->
-     subtype (TCom s') (TCom s1)->
-     subtype (Ety a s) (Ety a1 s1) ->
-     subtype (TId a s) (TId a1 s1) ->
-     subtype (TCom s) (TCom s1)*)
  | S_Cmd : forall (s s': sec) (a a': ty),
      less_equal_to s s' ->
      subtype (TCom s') (TCom s) .
 
 (* the last one is like if phrase p hast type rho and rho is subtype of rho', phrase p has type rho' so can't implement
  here cuz it would be term "tm" this will just follow based on the four subtype rules here.  *)
-
 
 Example newt : subtype ( Ety TNat Low) ( Ety TNat High).
 Proof.
@@ -252,6 +232,27 @@ Inductive has_type : tm -> ta -> Prop :=
                                     
 where "'|-' t '\in' T" := (has_type t T).
 
+Inductive has_type_s : tm -> ta -> Prop :=
+   | R_Ass_s : forall (t1 t2: tm) (t: ty) (s s': sec),
+       |- t1 \in (TId t) s->
+       |- t2 \in Ety t s-> less_equal_to s s' ->
+       |- iass t1 t2 \in TCom s'
+   | R_If_s : forall (t1 t2 t3: tm) (s s':sec),
+       |- t1 \in Ety TBool s->
+       |- t2 \in TCom s->          
+       |- t3 \in TCom s-> less_equal_to s s' ->
+       |- iif t1 t2 t3 \in TCom s'
+   | R_While : forall (t1 t2: tm) (s s': sec) ,
+       |- t1 \in Ety TBool s ->
+       |- t2 \in TCom s -> less_equal_to s s' ->
+       |- iwhile t1 t2 \in TCom s'                                     
+where "'|-' t '\in' T" := (has_type_s t T).
+(*
+Example type_ass_s :
+  |- (iass (iId (Id 0)) (iNum 5)) \in TCom High.
+Proof.
+  apply R_Ass_s with (t := TNat) (s:= Low).
+*)
 Example subtype_in:
   |- iNum 4 \in Ety TNat High.
 Proof.
