@@ -232,16 +232,59 @@ where "'|-' t '\in' T" := (has_type t T).
 Reserved Notation "'|--' t '\in' T" (at level 40).
   
 Inductive has_type_s : tm -> ta -> Prop :=
-   | R_Ass_s : forall (t1 t2: tm) (t: ty) (s s': sec),
+   | S_Bool : forall (n: bool) (s: sec),
+       |-- iBool n \in Ety TBool s(*change*)
+   | S_And : forall (t1: tm) (t2:tm) (s s': sec),
+       |-- t1 \in Ety TBool s ->
+       |-- t2 \in Ety TBool s -> less_equal_to s s' ->
+       |-- iand t1 t2 \in Ety TBool s'
+   | S_Or : forall (t1 t2: tm) (s s': sec),
+       |-- t1 \in Ety TBool s ->
+       |-- t2 \in Ety TBool s -> less_equal_to s s' ->
+       |-- ior t1 t2 \in Ety TBool s'
+   | S_Not : forall (t1: tm) (s s': sec),
+       |-- t1 \in Ety TBool s ->less_equal_to s s' ->
+       |-- inot t1 \in Ety TBool s'
+   | S_Eq : forall (t1 t2:tm) (s s': sec),
+       |-- t1 \in Ety TNat s ->
+       |-- t2 \in Ety TNat s ->less_equal_to s s' ->
+       |-- ieq t1 t2 \in Ety TBool s'
+   | S_Ble : forall (t1 t2:tm) (s s': sec),
+       |-- t1 \in Ety TNat s ->
+       |-- t2 \in Ety TNat s ->less_equal_to s s' ->
+       |-- ible t1 t2 \in Ety TBool s'
+   | S_Num : forall (n:nat) (s: sec),(*change*)
+       |-- iNum n \in Ety TNat s                                        
+   | S_Plus : forall (t1 t2:tm) (s s': sec),
+       |-- t1 \in Ety TNat s->
+       |-- t2 \in Ety TNat s->less_equal_to s s' ->
+       |-- iplus t1 t2 \in Ety TNat s'
+   | S_Minus : forall (t1 t2:tm) (s s': sec),
+       |-- t1 \in Ety TNat s->
+       |-- t2 \in Ety TNat s->less_equal_to s s' ->
+       |-- iminus t1 t2 \in Ety TNat s'
+   | S_Mult : forall (t1 t2:tm) (s s': sec),
+       |-- t1 \in Ety TNat s->
+       |-- t2 \in Ety TNat s->less_equal_to s s' ->
+       |-- imult t1 t2 \in Ety TNat s'
+   | S_Id : forall (n: id) (t: ty) (s s': sec),(*change*)
+       |-- iId n \in TId t s                
+   | S_Skip : forall (s:sec),
+       |-- iskip \in TCom s (*change*)                                      
+   | S_Ass : forall (t1 t2: tm) (t: ty) (s s': sec),
        |-- t1 \in (TId t) s->
        |-- t2 \in Ety t s-> less_equal_to s s' ->
        |-- iass t1 t2 \in TCom s'
-   | R_If_s : forall (t1 t2 t3: tm) (s s':sec),
+   | S_seq : forall (t1 t2:tm) (s s':sec),
+       |-- t1 \in TCom  s->
+       |-- t2 \in TCom s->  less_equal_to s s' ->        
+       |-- seq t1 t2 \in TCom s'                                       
+   | S_If : forall (t1 t2 t3: tm) (s s':sec),
        |-- t1 \in Ety TBool s->
        |-- t2 \in TCom s->          
        |-- t3 \in TCom s-> less_equal_to s s' ->
        |-- iif t1 t2 t3 \in TCom s'
-   | R_While : forall (t1 t2: tm) (s s': sec) ,
+   | S_While : forall (t1 t2: tm) (s s': sec) ,
        |-- t1 \in Ety TBool s ->
        |-- t2 \in TCom s -> less_equal_to s s' ->
        |-- iwhile t1 t2 \in TCom s'                                     
@@ -325,7 +368,7 @@ Proof.
 apply T_Not with (s:= Low).
 - apply T_Not. apply T_Bool.
 - apply Let_LH.
-
+(*
 Example type_num_sec :
   |- iNum 4 \in Ety TNat High.
 Proof.
