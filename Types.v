@@ -122,9 +122,12 @@ Check Ety TBool.
     is always empty. *)
 
 Inductive subtype: ta-> ta-> Prop :=
- | S_Base : forall (s s': sec) (a a': ty),
+ | S_Ety : forall (s s': sec) (a a': ty),
      less_equal_to s s' -> a=a' ->
      subtype (Ety a s) (Ety a' s')
+ | S_TId : forall (s s': sec) (a a': ty),
+     less_equal_to s s' -> a=a' ->
+     subtype (TId a s) (TId a' s')
  | S_Reflex : forall (a:ta),
      subtype a a 
  | S_Trans : forall (a b c:ta),
@@ -140,7 +143,7 @@ Inductive subtype: ta-> ta-> Prop :=
 
 Example newt : subtype ( Ety TNat Low) ( Ety TNat High).
 Proof.
-apply S_Base.
+apply S_Ety.
 - constructor.
 - reflexivity.
 Qed.
@@ -211,54 +214,52 @@ Inductive has_type : tm -> ta -> Prop :=
        |- t1 \in Ety TBool s ->
        |- t2 \in TCom s ->
        |- iwhile t1 t2 \in TCom s
-   | T_LessthanCom : forall (t: tm) (s: sec) (s': sec),
+(*   | T_LessthanCom : forall (t: tm) (s: sec) (s': sec),
        |- t \in TCom s -> less_equal_to s s' ->
        |- t \in TCom s'
    | T_LessthanEty : forall (t: tm) (t1: ty) (s: sec) (s': sec),
        |- t \in Ety t1 s -> less_equal_to s s' ->
        |- t \in Ety t1 s'
-   (*| T_LessthanNat : forall (t: tm) (s: sec) (s': sec),
-       |- t \in Ety TNat s -> less_equal_to s s' ->
-       |- t \in Ety TNat s'
-   | T_LessthanBool : forall (t: tm) (s: sec) (s': sec),
-       |- t \in Ety TBool s -> less_equal_to s s' ->
-       |- t \in Ety TBool s'*)
    | T_LessthanId : forall (t: tm) (t1: ty) (s: sec) (s': sec),
        |- t \in TId t1 s -> less_equal_to s s' ->
-       |- t \in TId t1 s'
+       |- t \in TId t1 s'*)
    | T_Subtype_rule : forall (t:tm) (a a':ta),
        |- t \in a -> subtype a a' ->
        |- t \in a'
                                     
 where "'|-' t '\in' T" := (has_type t T).
 
+Reserved Notation "'|--' t '\in' T" (at level 40).
+  
 Inductive has_type_s : tm -> ta -> Prop :=
    | R_Ass_s : forall (t1 t2: tm) (t: ty) (s s': sec),
-       |- t1 \in (TId t) s->
-       |- t2 \in Ety t s-> less_equal_to s s' ->
-       |- iass t1 t2 \in TCom s'
+       |-- t1 \in (TId t) s->
+       |-- t2 \in Ety t s-> less_equal_to s s' ->
+       |-- iass t1 t2 \in TCom s'
    | R_If_s : forall (t1 t2 t3: tm) (s s':sec),
-       |- t1 \in Ety TBool s->
-       |- t2 \in TCom s->          
-       |- t3 \in TCom s-> less_equal_to s s' ->
-       |- iif t1 t2 t3 \in TCom s'
+       |-- t1 \in Ety TBool s->
+       |-- t2 \in TCom s->          
+       |-- t3 \in TCom s-> less_equal_to s s' ->
+       |-- iif t1 t2 t3 \in TCom s'
    | R_While : forall (t1 t2: tm) (s s': sec) ,
-       |- t1 \in Ety TBool s ->
-       |- t2 \in TCom s -> less_equal_to s s' ->
-       |- iwhile t1 t2 \in TCom s'                                     
-where "'|-' t '\in' T" := (has_type_s t T).
+       |-- t1 \in Ety TBool s ->
+       |-- t2 \in TCom s -> less_equal_to s s' ->
+       |-- iwhile t1 t2 \in TCom s'                                     
+where "'|--' t '\in' T" := (has_type_s t T).
+
 (*
 Example type_ass_s :
   |- (iass (iId (Id 0)) (iNum 5)) \in TCom High.
 Proof.
   apply R_Ass_s with (t := TNat) (s:= Low).
-*)
+ *)
+
 Example subtype_in:
   |- iNum 4 \in Ety TNat High.
 Proof.
 apply T_Subtype_rule with (a:= Ety TNat Low). 
 - apply T_Num.
-- apply S_Base.
+- apply S_Ety.
   + constructor.
   + reflexivity.
 Qed.
@@ -271,55 +272,57 @@ apply T_Subtype_rule with (a:= TCom Low).
  +constructor.
  +constructor.
  + apply T_Ass with (t:= TNat).
-   * apply T_Id with (t:TNat).
-
+   * apply T_Id with (t:= TNat).
+Admitted.
 
 Example type_id_sec :
   |- iId (Id 0) \in TId TNat High.
 Proof.
-apply T_LessthanId with (s:= Low).
+apply T_Subtype_rule with (a:= TId TNat Low).
 - apply T_Id.
-- apply Let_LH.
+- apply S_TId.   
+ + apply Let_LH.
+ + reflexivity.
 Qed.
 
 Example type_ass_sec :
   |- (iass (iId (Id 0)) (iNum 5)) \in TCom High.
 Proof.
 apply T_Ass with (t:= TNat).
-- apply T_LessthanId with (s:= Low).
  + apply T_Id.
- + apply Let_LH.
-- apply T_Num.
+ + apply T_Num.
+Qed.
 
 Example type_if_sec :
   |- iif (iBool true) (iskip) (iass (iId (Id 0)) (iNum 5)) \in TCom High.
 Proof.
 apply T_If.
-- apply T_LessthanEty with (s:= Low). apply T_Bool. apply Let_LH.
-- apply T_LessthanCom with (s:=Low). apply T_Skip. apply Let_LH.
-- apply T_LessthanCom with (s:=Low). apply T_Ass with (t:= TNat). apply T_Id. apply T_Num. apply Let_LH.
+- apply T_Bool.
+- apply T_Skip.
+- apply T_Ass with (t:= TNat).
+ + apply T_Id.
+ + apply T_Num.
 Qed.
 
 Example type_bool_sec :
   |- iBool true \in Ety TBool High.
 Proof.
-apply T_LessthanEty with (s:= Low).
-- apply T_Bool.
-- apply Let_LH.
+apply T_Bool with (n:= true). (*verify*)
 Qed.
 
 Example type_and_sec :
   |- iand (iBool true) (iBool true) \in Ety TBool High.
 Proof.      
   apply T_And.
-  - apply T_LessthanEty with (s:= Low). apply T_Bool. apply Let_LH.
+  - apply T_Bool. 
   - apply T_Bool.
 Qed.
 
+(*
 Example type_not_sec :
   |- inot (iBool true) \in Ety TBool High.
 Proof.
-apply T_LessthanEty with (s:= Low).
+apply T_Not with (s:= Low).
 - apply T_Not. apply T_Bool.
 - apply Let_LH.
 
@@ -355,7 +358,7 @@ Proof.
   - apply T_LessthanEty with (s:= Low). apply T_Num. apply Let_LH.
   - apply T_Num.
 Qed.
-
+*)
 
 (*Create a separate inductive type to define T_meet and T_join? *)
 Check iif (iBool true) (iNum 5) (iNum 4).
