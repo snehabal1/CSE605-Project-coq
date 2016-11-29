@@ -134,7 +134,7 @@ Inductive subtype: ta-> ta-> Prop :=
      subtype a b ->
      subtype b c ->
      subtype a c
- | S_Cmd : forall (s s': sec) (a a': ty),
+ | S_Cmd : forall (s s': sec) (a a': ty), (*dont need ty here*)
      less_equal_to s s' ->
      subtype (TCom s') (TCom s) .
 
@@ -148,12 +148,18 @@ apply S_Ety.
 - reflexivity.
 Qed.
 
-Example newtn : ~ (subtype ( Ety TNat Low) ( Ety TBool High) ).
-Proof. 
+(*Example newtn : ~ (subtype ( Ety TNat Low) ( Ety TBool High) ).
+Proof.
+unfold not.
+intros.
+inversion H.
+-inversion H5.
+- simpl in H0.
 unfold not.
 intros.
 inversion H.
 inversion H5.
+Qed. this proof not happening is there something wrong in subtype..?*)
 
 Reserved Notation "'|-' t '\in' T" (at level 40).
 (*subtyping low into high for further use, low and high as lattice, *)
@@ -232,12 +238,13 @@ where "'|-' t '\in' T" := (has_type t T).
 Reserved Notation "'|--' t '\in' T" (at level 40).
   
 Inductive has_type_s : tm -> ta -> Prop :=
-   | S_Bool : forall (n: bool) (s: sec),
-       |-- iBool n \in Ety TBool s(*change*)
+   | S_Bool : forall (n: bool) (s s': sec),
+       less_equal_to s s' ->
+       |-- iBool n \in Ety TBool s' (*change*)
    | S_And : forall (t1: tm) (t2:tm) (s s': sec),
        |-- t1 \in Ety TBool s ->
        |-- t2 \in Ety TBool s -> less_equal_to s s' ->
-       |-- iand t1 t2 \in Ety TBool s'
+       |-- iand t1 t2 \in Ety TBool s'   (* is there a case where t2 in Ety TBool s' cuz they could be same or diff here we are enforcing same*)
    | S_Or : forall (t1 t2: tm) (s s': sec),
        |-- t1 \in Ety TBool s ->
        |-- t2 \in Ety TBool s -> less_equal_to s s' ->
@@ -253,8 +260,9 @@ Inductive has_type_s : tm -> ta -> Prop :=
        |-- t1 \in Ety TNat s ->
        |-- t2 \in Ety TNat s ->less_equal_to s s' ->
        |-- ible t1 t2 \in Ety TBool s'
-   | S_Num : forall (n:nat) (s: sec),(*change*)
-       |-- iNum n \in Ety TNat s                                        
+   | S_Num : forall (n:nat) (s s': sec),(*change*)
+       less_equal_to s s' ->
+       |-- iNum n \in Ety TNat s'                                        
    | S_Plus : forall (t1 t2:tm) (s s': sec),
        |-- t1 \in Ety TNat s->
        |-- t2 \in Ety TNat s->less_equal_to s s' ->
@@ -268,12 +276,14 @@ Inductive has_type_s : tm -> ta -> Prop :=
        |-- t2 \in Ety TNat s->less_equal_to s s' ->
        |-- imult t1 t2 \in Ety TNat s'
    | S_Id : forall (n: id) (t: ty) (s s': sec),(*change*)
-       |-- iId n \in TId t s                
-   | S_Skip : forall (s:sec),
-       |-- iskip \in TCom s (*change*)                                      
+       less_equal_to s s' ->
+       |-- iId n \in TId t s'                
+   | S_Skip : forall (s s':sec),
+       less_equal_to s s' ->
+       |-- iskip \in TCom s (*change see, flipped here according to subtype S_Cmd rule*)                                      
    | S_Ass : forall (t1 t2: tm) (t: ty) (s s': sec),
        |-- t1 \in (TId t) s->
-       |-- t2 \in Ety t s-> less_equal_to s s' ->
+       |-- t2 \in Ety t s-> less_equal_to s s' -> (*shouldn't it be flipped here and for all coms?*)
        |-- iass t1 t2 \in TCom s'
    | S_seq : forall (t1 t2:tm) (s s':sec),
        |-- t1 \in TCom  s->
