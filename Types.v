@@ -235,6 +235,28 @@ Inductive has_type : tm -> ta -> Prop :=
                                     
 where "'|-' t '\in' T" := (has_type t T).
 
+Lemma six_one : forall (p p': ta) (r: tm),
+  |- r \in p -> subtype p p' -> |- r \in p' .
+Proof.
+(* intros.
+induction H.
+- apply T_Subtype_rule with (a:= Ety TBool s).
+  + apply T_Bool.
+  +apply H0.
+- apply T_Subtype_rule with (a:= Ety TBool s).
+  + apply T_And. apply H. apply H1.   automate for every case..? maybe next method less mechanical*)
+intros.
+induction H0.
+- apply T_Subtype_rule with (a:= Ety a s).
+  + apply H.
+  + apply S_Ety. apply H0. apply H1.
+- apply T_Subtype_rule with (a:= TId a s).
+  + apply H.
+  + apply S_TId. apply H0. apply H1.
+- apply H.
+- 
+Admitted.
+
 Reserved Notation "'|--' t '\in' T" (at level 40).
   
 Inductive has_type_s : tm -> ta -> Prop :=
@@ -304,6 +326,15 @@ Lemma six_one : forall (p p': ta) (r: tm),
   |- r \in p -> subtype p p' -> |- r \in p' .
 Proof.
 intros.
+induction H0.
+- apply T_Subtype_rule with (a:= Ety a s).
+  + apply H.
+  + apply S_Ety. apply H0. apply H1.
+- apply T_Subtype_rule with (a:= TId a s).
+  + apply H.
+  + apply S_TId. apply H0. apply H1.
+- apply H.
+- simpl in IHsubtype1.
 Admitted.
 
 Theorem six_two_right: forall (p: ta) (r: tm),
