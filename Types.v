@@ -300,7 +300,29 @@ Inductive has_type_s : tm -> ta -> Prop :=
        |-- iwhile t1 t2 \in TCom s'                                     
 where "'|--' t '\in' T" := (has_type_s t T).
 
+Lemma six_one : forall (p p': ta) (r: tm),
+  |- r \in p -> subtype p p' -> |- r \in p' .
+Proof.
+intros.
+Admitted.
+
+Theorem six_two_right: forall (p: ta) (r: tm),
+  |-- r \in p -> |- r \in p .
+Proof.
+intros.
+Admitted.
+
+Theorem six_two_left: forall (p: ta) (r: tm),
+  |- r \in p -> |-- r \in p .
+Proof.
+intros.
+Admitted.
+
+
+
+
 (*
+
 Example type_ass_s :
   |- (iass (iId (Id 0)) (iNum 5)) \in TCom High.
 Proof.
