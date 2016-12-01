@@ -129,7 +129,7 @@ Inductive subtype: ta-> ta-> Prop :=
      subtype b c ->
      subtype a c
  | S_Cmd : forall (s s': sec),
-     less_equal_to s s' ->
+     less_equal_to s' s ->
      subtype (TCom s) (TCom s') .  (* changed dir of s and s' cuz was clashing with has_type_s less_equal_to direction*)
 
 Example newt : subtype ( Ety TNat Low) ( Ety TNat High).
@@ -254,25 +254,25 @@ Inductive has_type_s : tm -> ta -> Prop :=
        less_equal_to s s' ->
        |-- iId n \in TId t s'                
    | S_Skip : forall (s s':sec),
-       less_equal_to s s' ->
+       less_equal_to s' s ->
        |-- iskip \in TCom s'                                      
    | S_Ass : forall (t1 t2: tm) (t: ty) (s s': sec),
        |-- t1 \in (TId t) s->
-       |-- t2 \in Ety t s-> less_equal_to s s' -> (*shouldn't it be flipped here and for all coms? syntax directed rules in paper pg 11 do opposite*)
+       |-- t2 \in Ety t s-> less_equal_to s' s -> (*shouldn't it be flipped here and for all coms? syntax directed rules in paper pg 11 do opposite*)
        |-- iass t1 t2 \in TCom s'
    | S_seq : forall (t1 t2:tm) (s s':sec),
        |-- t1 \in TCom  s->
-       |-- t2 \in TCom s->  less_equal_to s s' ->        
+       |-- t2 \in TCom s->  less_equal_to s' s ->        
        |-- seq t1 t2 \in TCom s'                                       
    | S_If : forall (t1 t2 t3: tm) (s s':sec),
        |-- t1 \in Ety TBool s->
        |-- t2 \in TCom s->          
-       |-- t3 \in TCom s-> less_equal_to s s' ->
+       |-- t3 \in TCom s-> less_equal_to s' s ->
        |-- iif t1 t2 t3 \in TCom s'
    | S_While : forall (t1 t2: tm) (s s': sec) ,
        |-- t1 \in Ety TBool s ->
-       |-- t2 \in TCom s -> less_equal_to s s' ->
-       |-- iwhile t1 t2 \in TCom s'                                     
+       |-- t2 \in TCom s -> less_equal_to s' s ->
+       |-- iwhile t1 t2 \in TCom s'                                    
 where "'|--' t '\in' T" := (has_type_s t T).
 
 Lemma six_one1 : forall (p p': ta) (r: tm),
@@ -344,33 +344,21 @@ apply H0. apply IHhas_type_s. reflexivity.
    * reflexivity.
 - apply T_Id.
 - apply T_Skip.
-- apply T_Ass with (t:=t).
-  + apply S_TId with (a := t) (a' := t) in H1.
-   * apply T_Subtype_rule with (t := t1) in H1. apply H1. apply IHhas_type_s1.
-   * reflexivity.
-  + apply S_Ety with (a := t) (a' := t) in H1.
-   * apply T_Subtype_rule with (t := t2) in H1. apply H1. apply IHhas_type_s2.
-   * reflexivity.
-- apply T_seq.  (*used flipped command rule here might change from here on*)
-  + apply S_Cmd in H1. apply T_Subtype_rule with (t := t1) in H1. apply H1. apply IHhas_type_s1.
-  + apply S_Cmd in H1. apply T_Subtype_rule with (t := t2) in H1. apply H1. apply IHhas_type_s2.
-- apply T_If.
-  + apply S_Ety with (a := TBool) (a' := TBool) in H2.
-   * apply T_Subtype_rule with (t := t1) in H2. apply H2. apply IHhas_type_s1.
-   * reflexivity.
-  + apply S_Cmd in H2. apply T_Subtype_rule with (t := t2) in H2. apply H2. apply IHhas_type_s2.
-  + apply S_Cmd in H2. apply T_Subtype_rule with (t := t3) in H2. apply H2. apply IHhas_type_s3.
-- apply T_While.
-  + apply S_Ety with (a := TBool) (a' := TBool) in H1.
-   * apply T_Subtype_rule with (t := t1) in H1. apply H1. apply IHhas_type_s1.
-   * reflexivity.
-  + apply S_Cmd in H1. apply T_Subtype_rule with (t := t2) in H1. apply H1. apply IHhas_type_s2.
-Qed. 
+- apply S_Cmd in H1. apply T_Subtype_rule with (t := iass t1 t2) in H1. apply H1.
+apply T_Ass with (t:=t). apply IHhas_type_s1. apply IHhas_type_s2.
+- apply S_Cmd in H1. apply T_Subtype_rule with (t := seq t1 t2) in H1. apply H1.
+apply T_seq. apply IHhas_type_s1. apply IHhas_type_s2.
+- apply S_Cmd in H2. apply T_Subtype_rule with (t := iif t1 t2 t3) in H2. apply H2.
+apply T_If. apply IHhas_type_s1. apply IHhas_type_s2. apply IHhas_type_s3.
+- apply S_Cmd in H1. apply T_Subtype_rule with (t := iwhile t1 t2) in H1. apply H1.
+apply T_While. apply IHhas_type_s1. apply IHhas_type_s2.
+Qed.
 
 Theorem six_two_left: forall (p: ta) (r: tm),
   |- r \in p -> |-- r \in p .
 Proof.
 intros.
+inversion H.
 Admitted.
 
 
