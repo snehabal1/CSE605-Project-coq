@@ -279,33 +279,17 @@ Lemma six_one1 : forall (p p': ta) (r: tm),
   |-- r \in p -> subtype p p' -> |-- r \in p' .
 Proof.
 intros.
-induction H. 
+induction H.
 - apply S_Bool with (n:= true) in H. Admitted.
 
-(* Introduce lemma to reduce proof for six_two_right*)
-(*Lemma six_two_1 : forall (p1 p2: tm) (s s': sec), 
-    |-- p1 \in Ety TBool s  ->
-    |-- p2 \in Ety TBool s  -> less_equal_to s s'->
-    |- p1 \in Ety TBool s ->
-    |- p2 \in Ety TBool s ->
-    |- p1 \in Ety TBool s' -> |- p2 \in Ety TBool s'.
-Proof.
-  intros.
- - apply S_Ety with (a := TBool) (a' := TBool) in H1.
-   + apply T_Subtype_rule with (t:= p2) in H1.
-     apply H1.
-     apply H3.
-  + reflexivity.
-Qed.
-*)
-  (*  |- p2 \in Ety TBool s'.*) 
-  Theorem six_two_right: forall (p: ta) (r: tm),
+
+
+Theorem six_two_right: forall (p: ta) (r: tm),
   |-- r \in p -> |- r \in p .
 Proof.
 intros.
 induction H.
 - apply T_Bool.
-  
 - apply T_And.
   + apply S_Ety with (a := TBool) (a' := TBool) in H1.
    * apply T_Subtype_rule with (t := t1) in H1. apply H1. apply IHhas_type_s1.
@@ -313,7 +297,6 @@ induction H.
   + apply S_Ety with (a := TBool) (a' := TBool) in H1.
    * apply T_Subtype_rule with (t := t2) in H1. apply H1. apply IHhas_type_s2.
    * reflexivity.
-     
 - apply T_Or.
   + apply S_Ety with (a := TBool) (a' := TBool) in H1.
    * apply T_Subtype_rule with (t := t1) in H1. apply H1. apply IHhas_type_s1.
@@ -321,7 +304,6 @@ induction H.
   + apply S_Ety with (a := TBool) (a' := TBool) in H1.
    * apply T_Subtype_rule with (t := t2) in H1. apply H1. apply IHhas_type_s2.
    * reflexivity.
-     
 - apply T_Not. apply S_Ety with (a := TBool) (a' := TBool) in H0.  apply T_Subtype_rule with (t := t1) in H0.
 apply H0. apply IHhas_type_s. reflexivity.
 - apply T_Eq.
@@ -331,7 +313,6 @@ apply H0. apply IHhas_type_s. reflexivity.
   + apply S_Ety with (a := TNat) (a' := TNat) in H1.
    * apply T_Subtype_rule with (t := t2) in H1. apply H1. apply IHhas_type_s2.
    * reflexivity.
-     
 - apply T_Ble.
   + apply S_Ety with (a := TNat) (a' := TNat) in H1.
    * apply T_Subtype_rule with (t := t1) in H1. apply H1. apply IHhas_type_s1.
@@ -339,7 +320,6 @@ apply H0. apply IHhas_type_s. reflexivity.
   + apply S_Ety with (a := TNat) (a' := TNat) in H1.
    * apply T_Subtype_rule with (t := t2) in H1. apply H1. apply IHhas_type_s2.
    * reflexivity.
-     
 - apply T_Num.
 - apply T_Plus.
   + apply S_Ety with (a := TNat) (a' := TNat) in H1.
@@ -348,7 +328,6 @@ apply H0. apply IHhas_type_s. reflexivity.
   + apply S_Ety with (a := TNat) (a' := TNat) in H1.
    * apply T_Subtype_rule with (t := t2) in H1. apply H1. apply IHhas_type_s2.
    * reflexivity.
-     
 - apply T_Minus.
   + apply S_Ety with (a := TNat) (a' := TNat) in H1.
    * apply T_Subtype_rule with (t := t1) in H1. apply H1. apply IHhas_type_s1.
@@ -356,7 +335,6 @@ apply H0. apply IHhas_type_s. reflexivity.
   + apply S_Ety with (a := TNat) (a' := TNat) in H1.
    * apply T_Subtype_rule with (t := t2) in H1. apply H1. apply IHhas_type_s2.
    * reflexivity.
-     
 - apply T_Mult.
   + apply S_Ety with (a := TNat) (a' := TNat) in H1.
    * apply T_Subtype_rule with (t := t1) in H1. apply H1. apply IHhas_type_s1.
@@ -364,7 +342,6 @@ apply H0. apply IHhas_type_s. reflexivity.
   + apply S_Ety with (a := TNat) (a' := TNat) in H1.
    * apply T_Subtype_rule with (t := t2) in H1. apply H1. apply IHhas_type_s2.
    * reflexivity.
-     
 - apply T_Id.
 - apply T_Skip.
 - apply S_Cmd in H1. apply T_Subtype_rule with (t := iass t1 t2) in H1. apply H1.
