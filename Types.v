@@ -283,20 +283,23 @@ induction H.
 - apply S_Bool with (n:= true) in H. Admitted.
 
 (* Introduce lemma to reduce proof for six_two_right*)
-Theorem six_two_1 : forall (t1 t2: tm) (s s': sec), 
-    |-- t1 \in Ety TBool s  ->
-    |-- t2 \in Ety TBool s  -> less_equal_to s s'->
-    |- t1 \in Ety TBool s ->
-    |- t2 \in Ety TBool s ->
-    |- t1 \in Ety TBool s'.
+(*Lemma six_two_1 : forall (p1 p2: tm) (s s': sec), 
+    |-- p1 \in Ety TBool s  ->
+    |-- p2 \in Ety TBool s  -> less_equal_to s s'->
+    |- p1 \in Ety TBool s ->
+    |- p2 \in Ety TBool s ->
+    |- p1 \in Ety TBool s' -> |- p2 \in Ety TBool s'.
 Proof.
-  intros. 
+  intros.
  - apply S_Ety with (a := TBool) (a' := TBool) in H1.
-   + apply T_Subtype_rule with (t:= t1) in H1. apply H1. apply H2.
+   + apply T_Subtype_rule with (t:= p2) in H1.
+     apply H1.
+     apply H3.
   + reflexivity.
 Qed.
-
-Theorem six_two_right: forall (p: ta) (r: tm),
+*)
+  (*  |- p2 \in Ety TBool s'.*) 
+  Theorem six_two_right: forall (p: ta) (r: tm),
   |-- r \in p -> |- r \in p .
 Proof.
 intros.
@@ -304,7 +307,6 @@ induction H.
 - apply T_Bool.
   
 - apply T_And.
-  (* apply six_two_1).*)
   + apply S_Ety with (a := TBool) (a' := TBool) in H1.
    * apply T_Subtype_rule with (t := t1) in H1. apply H1. apply IHhas_type_s1.
    * reflexivity.
@@ -365,19 +367,14 @@ apply H0. apply IHhas_type_s. reflexivity.
      
 - apply T_Id.
 - apply T_Skip.
-  
 - apply S_Cmd in H1. apply T_Subtype_rule with (t := iass t1 t2) in H1. apply H1.
-  apply T_Ass with (t:=t). apply IHhas_type_s1. apply IHhas_type_s2.
-  
+apply T_Ass with (t:=t). apply IHhas_type_s1. apply IHhas_type_s2.
 - apply S_Cmd in H1. apply T_Subtype_rule with (t := seq t1 t2) in H1. apply H1.
-  apply T_seq. apply IHhas_type_s1. apply IHhas_type_s2.
-  
+apply T_seq. apply IHhas_type_s1. apply IHhas_type_s2.
 - apply S_Cmd in H2. apply T_Subtype_rule with (t := iif t1 t2 t3) in H2. apply H2.
-  apply T_If. apply IHhas_type_s1. apply IHhas_type_s2. apply IHhas_type_s3.
-  
+apply T_If. apply IHhas_type_s1. apply IHhas_type_s2. apply IHhas_type_s3.
 - apply S_Cmd in H1. apply T_Subtype_rule with (t := iwhile t1 t2) in H1. apply H1.
-  apply T_While. apply IHhas_type_s1. apply IHhas_type_s2.
-  
+apply T_While. apply IHhas_type_s1. apply IHhas_type_s2.
 Qed.
 
 Theorem six_two_left: forall (p: ta) (r: tm),
