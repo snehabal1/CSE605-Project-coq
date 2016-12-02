@@ -88,10 +88,21 @@ Inductive ta : Type :=
   | TCom : sec -> ta
   | TId : ty -> sec -> ta.
 
-Inductive less_equal_to : sec -> sec -> Prop :=
+(*Inductive less_equal_to : sec -> sec -> Prop :=
 | Let_HH : less_equal_to High High
 | Let_LL : less_equal_to Low Low
+| Let_LH : less_equal_to Low High.*)
+
+Inductive less_equal_to : sec -> sec -> Prop :=
+| Let_ss : forall (s:sec),
+  less_equal_to s s
 | Let_LH : less_equal_to Low High.
+
+(*Example test_hl: ~ (less_equal_to High Low).
+Proof.
+intros.
+unfold not. *)
+
 
 Definition meet (l h:sec) : sec :=
   match l, h with
@@ -275,6 +286,9 @@ Inductive has_type_s : tm -> ta -> Prop :=
        |-- iwhile t1 t2 \in TCom s'                                    
 where "'|--' t '\in' T" := (has_type_s t T).
 
+<<<<<<< HEAD
+
+=======
 Lemma six_one1 : forall (p p': ta) (r: tm),
   |-- r \in p -> subtype p p' -> |-- r \in p' .
 Proof.
@@ -284,6 +298,7 @@ induction H.
 
 
 
+>>>>>>> 70dcd9f33bf91ca1e543f1a3a2291cd7813b5be6
 Theorem six_two_right: forall (p: ta) (r: tm),
   |-- r \in p -> |- r \in p .
 Proof.
@@ -354,15 +369,62 @@ apply T_If. apply IHhas_type_s1. apply IHhas_type_s2. apply IHhas_type_s3.
 apply T_While. apply IHhas_type_s1. apply IHhas_type_s2.
 Qed.
 
+
+Lemma six_one : forall (p p': ta) (r: tm),  (*do we need 4.1 here ? *)
+  |-- r \in p -> subtype p p' -> |-- r \in p' .
+Proof.
+intros.
+(*induction H0.
+- apply six_two_right in H.
+induction H.
+- apply T_Subtype_rule with (t := iBool n) in H0. apply S_Bool with (n := n) in H. apply six_two_right in H.*)
+induction H.
+- apply S_Ety with (a := TBool) (a' := TBool) in H. apply S_Trans with (a := Ety TBool s) in H0.
+
+Admitted.
+
+
 Theorem six_two_left: forall (p: ta) (r: tm),
   |- r \in p -> |-- r \in p .
 Proof.
 intros.
-inversion H.
-Admitted.
+induction H.
+- apply S_Bool with (s := s). apply Let_ss.
+- apply S_And with (s := s). apply IHhas_type1. apply IHhas_type2. apply Let_ss.
+- apply S_Or with (s := s). apply IHhas_type1. apply IHhas_type2. apply Let_ss.
+- apply S_Not with (s := s). apply IHhas_type. apply Let_ss.
+- apply S_Eq with (s := s). apply IHhas_type1. apply IHhas_type2. apply Let_ss.
+- apply S_Ble with (s := s). apply IHhas_type1. apply IHhas_type2. apply Let_ss.
+- apply S_Num with (s := s). apply Let_ss.
+- apply S_Plus with (s := s). apply IHhas_type1. apply IHhas_type2. apply Let_ss.
+- apply S_Minus with (s := s). apply IHhas_type1. apply IHhas_type2. apply Let_ss.
+- apply S_Mult with (s := s). apply IHhas_type1. apply IHhas_type2. apply Let_ss.
+- apply S_Id with (s := s). apply Let_ss.
+- apply S_Skip with (s := s). apply Let_ss.
+- apply S_Ass with (s := s) (t := t). apply IHhas_type1. apply IHhas_type2. apply Let_ss.
+- apply S_seq with (s := s). apply IHhas_type1. apply IHhas_type2. apply Let_ss.
+- apply S_If with (s := s). apply IHhas_type1. apply IHhas_type2. apply IHhas_type3. apply Let_ss.
+- apply S_While with (s := s). apply IHhas_type1. apply IHhas_type2. apply Let_ss.
+- apply six_one with (r := t) in H0. apply H0. apply IHhas_type.
+Qed.
 
 
-
+(* Introduce lemma to reduce proof for six_two_right*)
+(*Lemma six_two_1 : forall (p1 p2: tm) (s s': sec), 
+    |-- p1 \in Ety TBool s  ->
+    |-- p2 \in Ety TBool s  -> less_equal_to s s'->
+    |- p1 \in Ety TBool s ->
+    |- p2 \in Ety TBool s ->
+    |- p1 \in Ety TBool s' -> |- p2 \in Ety TBool s'.
+Proof.
+  intros.
+ - apply S_Ety with (a := TBool) (a' := TBool) in H1.
+   + apply T_Subtype_rule with (t:= p2) in H1.
+     apply H1.
+     apply H3.
+  + reflexivity.
+Qed.
+*)
 (*Lemma six_one : forall (p p': ta) (r: tm),
   |- r \in p -> subtype p p' -> |- r \in p' .
 Proof.
@@ -389,7 +451,7 @@ induction H0.
 Qed. *)
 
 
-(*
+(*445
 
 Example type_ass_s :
   |- (iass (iId (Id 0)) (iNum 5)) \in TCom High.
