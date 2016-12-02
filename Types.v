@@ -103,7 +103,6 @@ Proof.
 intros.
 unfold not. *)
 
-
 Definition meet (l h:sec) : sec :=
   match l, h with
   |Low, High => Low
@@ -286,13 +285,13 @@ Inductive has_type_s : tm -> ta -> Prop :=
        |-- iwhile t1 t2 \in TCom s'                                    
 where "'|--' t '\in' T" := (has_type_s t T).
 
+
 Lemma six_one1 : forall (p p': ta) (r: tm),
   |-- r \in p -> subtype p p' -> |-- r \in p' .
 Proof.
 intros.
 induction H.
 - apply S_Bool with (n:= true) in H. Admitted.
-
 
 
 Theorem six_two_right: forall (p: ta) (r: tm),
@@ -370,13 +369,14 @@ Lemma six_one : forall (p p': ta) (r: tm),  (*do we need 4.1 here ? *)
   |-- r \in p -> subtype p p' -> |-- r \in p' .
 Proof.
 intros.
+  
 (*induction H0.
 - apply six_two_right in H.
 induction H.
 - apply T_Subtype_rule with (t := iBool n) in H0. apply S_Bool with (n := n) in H. apply six_two_right in H.*)
+
 induction H.
 - apply S_Ety with (a := TBool) (a' := TBool) in H. apply S_Trans with (a := Ety TBool s) in H0.
-
 Admitted.
 
 
@@ -403,49 +403,6 @@ induction H.
 - apply S_While with (s := s). apply IHhas_type1. apply IHhas_type2. apply Let_ss.
 - apply six_one with (r := t) in H0. apply H0. apply IHhas_type.
 Qed.
-
-
-(* Introduce lemma to reduce proof for six_two_right*)
-(*Lemma six_two_1 : forall (p1 p2: tm) (s s': sec), 
-    |-- p1 \in Ety TBool s  ->
-    |-- p2 \in Ety TBool s  -> less_equal_to s s'->
-    |- p1 \in Ety TBool s ->
-    |- p2 \in Ety TBool s ->
-    |- p1 \in Ety TBool s' -> |- p2 \in Ety TBool s'.
-Proof.
-  intros.
- - apply S_Ety with (a := TBool) (a' := TBool) in H1.
-   + apply T_Subtype_rule with (t:= p2) in H1.
-     apply H1.
-     apply H3.
-  + reflexivity.
-Qed.
-*)
-(*Lemma six_one : forall (p p': ta) (r: tm),
-  |- r \in p -> subtype p p' -> |- r \in p' .
-Proof.
-(*intros.
-induction H.
-- apply T_Subtype_rule with (a:= Ety TBool s).
-  + apply T_Bool.
-  +apply H0.
-- apply T_Subtype_rule with (a:= Ety TBool s).
-  + apply T_And. apply H. apply H1.    (*automate for every case..? maybe next method less mechanical*) *)
-intros.
-induction H0.
-- apply T_Subtype_rule with (a:= Ety a s).
-  + apply H.
-  + apply S_Ety. apply H0. apply H1.
-- apply T_Subtype_rule with (a:= TId a s).
-  + apply H.
-  + apply S_TId. apply H0. apply H1.
-- apply H.
-- apply IHsubtype2. apply IHsubtype1. apply H.
-- apply T_Subtype_rule with (a:= TCom s').
-  + apply H.
-  + apply S_Cmd. apply H0.
-Qed. *)
-
 
 (*445
 
