@@ -286,15 +286,6 @@ Inductive has_type_s : tm -> ta -> Prop :=
        |-- iwhile t1 t2 \in TCom s'                                    
 where "'|--' t '\in' T" := (has_type_s t T).
 
-Lemma six_one : forall (p p': ta) (r: tm),
-  |-- r \in p -> subtype p p' -> |-- r \in p' .
-Proof.
-intros.
-induction H.
--
-Admitted.
-
-
 
 Theorem six_two_right: forall (p: ta) (r: tm),
   |-- r \in p -> |- r \in p .
@@ -365,6 +356,21 @@ apply T_If. apply IHhas_type_s1. apply IHhas_type_s2. apply IHhas_type_s3.
 - apply S_Cmd in H1. apply T_Subtype_rule with (t := iwhile t1 t2) in H1. apply H1.
 apply T_While. apply IHhas_type_s1. apply IHhas_type_s2.
 Qed.
+
+
+Lemma six_one : forall (p p': ta) (r: tm),  (*do we need 4.1 here ? *)
+  |-- r \in p -> subtype p p' -> |-- r \in p' .
+Proof.
+intros.
+(*induction H0.
+- apply six_two_right in H.
+induction H.
+- apply T_Subtype_rule with (t := iBool n) in H0. apply S_Bool with (n := n) in H. apply six_two_right in H.*)
+induction H.
+- apply S_Ety with (a := TBool) (a' := TBool) in H. apply S_Trans with (a := Ety TBool s) in H0.
+
+Admitted.
+
 
 Theorem six_two_left: forall (p: ta) (r: tm),
   |- r \in p -> |-- r \in p .
