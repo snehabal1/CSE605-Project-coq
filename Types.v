@@ -294,6 +294,21 @@ Inductive has_type_s : tm -> ta -> Prop :=
        |-- iwhile t1 t2 \in TCom s'                                    
 where "'|--' t '\in' T" := (has_type_s t T).
 
+Lemma six_twoBool: forall (t1: tm) (s s': sec),
+|-- t1 \in Ety TBool s ->  |- t1 \in Ety TBool s  -> less_equal_to s s' ->
+|- t1 \in Ety TBool s'.
+Proof.
+  intros. apply S_Ety with (a := TBool) in H1. apply T_Subtype_rule with (t := t1) in H1.
+  apply H1. apply H0.
+ Qed.
+
+Lemma six_twoNat: forall (t1: tm) (s s': sec),
+|-- t1 \in Ety TNat s ->  |- t1 \in Ety TNat s  -> less_equal_to s s' ->
+|- t1 \in Ety TNat s'.
+Proof.
+  intros. apply S_Ety with (a := TNat) in H1. apply T_Subtype_rule with (t := t1) in H1.
+  apply H1. apply H0.
+ Qed.
 
 Theorem six_two_right: forall (p: ta) (r: tm),
   |-- r \in p -> |- r \in p .
@@ -302,53 +317,36 @@ intros.
 induction H.
 - apply T_Bool.
 - apply T_And.
-  + apply S_Ety with (a := TBool) in H1.
-   * apply T_Subtype_rule with (t := t1) in H1. apply H1. apply IHhas_type_s1.
-  + apply S_Ety with (a := TBool) in H1.
-   * apply T_Subtype_rule with (t := t2) in H1. apply H1. apply IHhas_type_s2.
+  + apply six_twoBool with (s:= s). apply H. apply IHhas_type_s1. apply H1.
+  + apply six_twoBool with (s:= s). apply H0. apply IHhas_type_s2. apply H1.
 - apply T_Or.
-  + apply S_Ety with (a := TBool) in H1.
-   * apply T_Subtype_rule with (t := t1) in H1. apply H1. apply IHhas_type_s1.
-  + apply S_Ety with (a := TBool) in H1.
-   * apply T_Subtype_rule with (t := t2) in H1. apply H1. apply IHhas_type_s2.
-- apply T_Not. apply S_Ety with (a := TBool) in H0.  apply T_Subtype_rule with (t := t1) in H0.
-apply H0. apply IHhas_type_s.
+  + apply six_twoBool with (s:= s). apply H. apply IHhas_type_s1. apply H1.
+  + apply six_twoBool with (s:= s). apply H0. apply IHhas_type_s2. apply H1.
+- apply T_Not.
+  + apply six_twoBool with (s:= s). apply H. apply IHhas_type_s. apply H0.    
 - apply T_Eq.
-  + apply S_Ety with (a := TNat) in H1.
-   * apply T_Subtype_rule with (t := t1) in H1. apply H1. apply IHhas_type_s1.
-  + apply S_Ety with (a := TNat) in H1.
-   * apply T_Subtype_rule with (t := t2) in H1. apply H1. apply IHhas_type_s2.
+  + apply six_twoNat with (s:= s). apply H. apply IHhas_type_s1. apply H1.
+  + apply six_twoNat with (s:= s). apply H0. apply IHhas_type_s2. apply H1.   
 - apply T_Ble.
-  + apply S_Ety with (a := TNat) in H1.
-   * apply T_Subtype_rule with (t := t1) in H1. apply H1. apply IHhas_type_s1.
-  + apply S_Ety with (a := TNat) in H1.
-   * apply T_Subtype_rule with (t := t2) in H1. apply H1. apply IHhas_type_s2.
+  + apply six_twoNat with (s:= s). apply H. apply IHhas_type_s1. apply H1.
+  + apply six_twoNat with (s:= s). apply H0. apply IHhas_type_s2. apply H1.
 - apply T_Num.
 - apply T_Plus.
-  + apply S_Ety with (a := TNat) in H1.
-   * apply T_Subtype_rule with (t := t1) in H1. apply H1. apply IHhas_type_s1.
-  + apply S_Ety with (a := TNat) in H1.
-   * apply T_Subtype_rule with (t := t2) in H1. apply H1. apply IHhas_type_s2.
+  + apply six_twoNat with (s:= s). apply H. apply IHhas_type_s1. apply H1.
+  + apply six_twoNat with (s:= s). apply H0. apply IHhas_type_s2. apply H1.
 - apply T_Minus.
-  + apply S_Ety with (a := TNat) in H1.
-   * apply T_Subtype_rule with (t := t1) in H1. apply H1. apply IHhas_type_s1.
-  + apply S_Ety with (a := TNat) in H1.
-   * apply T_Subtype_rule with (t := t2) in H1. apply H1. apply IHhas_type_s2.
+  + apply six_twoNat with (s:= s). apply H. apply IHhas_type_s1. apply H1.
+  + apply six_twoNat with (s:= s). apply H0. apply IHhas_type_s2. apply H1.
 - apply T_Mult.
-  + apply S_Ety with (a := TNat) in H1.
-   * apply T_Subtype_rule with (t := t1) in H1. apply H1. apply IHhas_type_s1.
-  + apply S_Ety with (a := TNat) in H1.
-   * apply T_Subtype_rule with (t := t2) in H1. apply H1. apply IHhas_type_s2.
+  + apply six_twoNat with (s:= s). apply H. apply IHhas_type_s1. apply H1.
+  + apply six_twoNat with (s:= s). apply H0. apply IHhas_type_s2. apply H1.
 - apply T_Id.
 - apply T_Skip.
-- apply S_Cmd in H1. apply T_Subtype_rule with (t := iass t1 t2) in H1. apply H1.
-apply T_Ass with (t:=t). apply IHhas_type_s1. apply IHhas_type_s2.
-- apply S_Cmd in H1. apply T_Subtype_rule with (t := seq t1 t2) in H1. apply H1.
-apply T_seq. apply IHhas_type_s1. apply IHhas_type_s2.
-- apply S_Cmd in H2. apply T_Subtype_rule with (t := iif t1 t2 t3) in H2. apply H2.
-apply T_If. apply IHhas_type_s1. apply IHhas_type_s2. apply IHhas_type_s3.
-- apply S_Cmd in H1. apply T_Subtype_rule with (t := iwhile t1 t2) in H1. apply H1.
-apply T_While. apply IHhas_type_s1. apply IHhas_type_s2.
+- apply S_Cmd in H1.
+apply T_Subtype_rule with (t := iass t1 t2) in H1. apply H1. apply T_Ass with (t:=t). apply IHhas_type_s1. apply IHhas_type_s2.
+- apply S_Cmd in H1. apply T_Subtype_rule with (t := seq t1 t2) in H1. apply H1. apply T_seq. apply IHhas_type_s1. apply IHhas_type_s2.
+- apply S_Cmd in H2. apply T_Subtype_rule with (t := iif t1 t2 t3) in H2. apply H2. apply T_If. apply IHhas_type_s1. apply IHhas_type_s2. apply IHhas_type_s3.
+- apply S_Cmd in H1. apply T_Subtype_rule with (t := iwhile t1 t2) in H1. apply H1. apply T_While. apply IHhas_type_s1. apply IHhas_type_s2.
 Qed.
 
 
@@ -362,11 +360,11 @@ induction H.
 - apply T_Subtype_rule with (t := iBool n) in H0. apply S_Bool with (n := n) in H. apply six_two_right in H.*)
 induction H.
 + intros. remember (Ety TBool s). induction H; try constructor; try contradiction.
-  -inversion Heqt. constructor.
+  - inversion Heqt. constructor.
   - inversion Heqt.
   - subst. constructor.
   - remember (a=Ety TBool s). apply IHsubtype1 in Heqt. inversion Heqt.  remember (Ety TBool s).
-
+    
 
 
 
