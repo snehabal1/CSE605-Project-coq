@@ -98,10 +98,20 @@ Inductive less_equal_to : sec -> sec -> Prop :=
   less_equal_to s s
 | Let_LH : less_equal_to Low High.
 
+Lemma trans_less_equal_to : forall (a b c:sec),
+     less_equal_to a b ->
+     less_equal_to b c ->
+     less_equal_to a c .
+Proof.
+intros.
+destruct H. apply H0. inversion H0. apply Let_LH.
+Qed.
+
 (*Example test_hl: ~ (less_equal_to High Low).
 Proof.
 intros.
 unfold not. *)
+
 
 Definition meet (l h:sec) : sec :=
   match l, h with
@@ -126,9 +136,9 @@ Proof. simpl. reflexivity.  Qed.
 Check Ety TBool.
 
 Inductive subtype: ta-> ta-> Prop :=
- | S_Ety : forall (s s': sec) (a a': ty),
-     less_equal_to s s' -> a=a' ->
-     subtype (Ety a s) (Ety a' s')
+ | S_Ety : forall (s s': sec) (a : ty),
+     less_equal_to s s' ->
+     subtype (Ety a s) (Ety a s')
  | S_TId : forall (s s': sec) (a a': ty),
      less_equal_to s s' -> a=a' ->
      subtype (TId a s) (TId a' s')
@@ -142,12 +152,12 @@ Inductive subtype: ta-> ta-> Prop :=
      less_equal_to s' s ->
      subtype (TCom s) (TCom s') .  (* changed dir of s and s' cuz was clashing with has_type_s less_equal_to direction*)
 
-Example newt : subtype ( Ety TNat Low) ( Ety TNat High).
+(*Example newt : subtype ( Ety TNat Low) ( Ety TNat High).
 Proof.
 apply S_Ety.
 - constructor.
 - reflexivity.
-Qed.
+Qed.*)
 
 (** In informal notation, the typing relation is often written
     [|- t \in T] and pronounced "[t] has type [T]."  The [|-] symbol
@@ -223,9 +233,8 @@ where "'|-' t '\in' T" := (has_type t T).
 
 Reserved Notation "'|--' t '\in' T" (at level 40).
 Inductive has_type_s : tm -> ta -> Prop :=
-   | S_Bool : forall (n: bool) (s s': sec),
-       less_equal_to s s' ->
-       |-- iBool n \in Ety TBool s'
+   | S_Bool : forall (n: bool) (s : sec),
+       |-- iBool n \in Ety TBool s
    | S_And : forall (t1: tm) (t2:tm) (s s': sec),
        |-- t1 \in Ety TBool s ->
        |-- t2 \in Ety TBool s -> less_equal_to s s' ->
@@ -286,14 +295,6 @@ Inductive has_type_s : tm -> ta -> Prop :=
 where "'|--' t '\in' T" := (has_type_s t T).
 
 
-Lemma six_one1 : forall (p p': ta) (r: tm),
-  |-- r \in p -> subtype p p' -> |-- r \in p' .
-Proof.
-intros.
-induction H.
-- apply S_Bool with (n:= true) in H. Admitted.
-
-
 Theorem six_two_right: forall (p: ta) (r: tm),
   |-- r \in p -> |- r \in p .
 Proof.
@@ -301,57 +302,43 @@ intros.
 induction H.
 - apply T_Bool.
 - apply T_And.
-  + apply S_Ety with (a := TBool) (a' := TBool) in H1.
+  + apply S_Ety with (a := TBool) in H1.
    * apply T_Subtype_rule with (t := t1) in H1. apply H1. apply IHhas_type_s1.
-   * reflexivity.
-  + apply S_Ety with (a := TBool) (a' := TBool) in H1.
+  + apply S_Ety with (a := TBool) in H1.
    * apply T_Subtype_rule with (t := t2) in H1. apply H1. apply IHhas_type_s2.
-   * reflexivity.
 - apply T_Or.
-  + apply S_Ety with (a := TBool) (a' := TBool) in H1.
+  + apply S_Ety with (a := TBool) in H1.
    * apply T_Subtype_rule with (t := t1) in H1. apply H1. apply IHhas_type_s1.
-   * reflexivity.
-  + apply S_Ety with (a := TBool) (a' := TBool) in H1.
+  + apply S_Ety with (a := TBool) in H1.
    * apply T_Subtype_rule with (t := t2) in H1. apply H1. apply IHhas_type_s2.
-   * reflexivity.
-- apply T_Not. apply S_Ety with (a := TBool) (a' := TBool) in H0.  apply T_Subtype_rule with (t := t1) in H0.
-apply H0. apply IHhas_type_s. reflexivity.
+- apply T_Not. apply S_Ety with (a := TBool) in H0.  apply T_Subtype_rule with (t := t1) in H0.
+apply H0. apply IHhas_type_s.
 - apply T_Eq.
-  + apply S_Ety with (a := TNat) (a' := TNat) in H1.
+  + apply S_Ety with (a := TNat) in H1.
    * apply T_Subtype_rule with (t := t1) in H1. apply H1. apply IHhas_type_s1.
-   * reflexivity.
-  + apply S_Ety with (a := TNat) (a' := TNat) in H1.
+  + apply S_Ety with (a := TNat) in H1.
    * apply T_Subtype_rule with (t := t2) in H1. apply H1. apply IHhas_type_s2.
-   * reflexivity.
 - apply T_Ble.
-  + apply S_Ety with (a := TNat) (a' := TNat) in H1.
+  + apply S_Ety with (a := TNat) in H1.
    * apply T_Subtype_rule with (t := t1) in H1. apply H1. apply IHhas_type_s1.
-   * reflexivity.
-  + apply S_Ety with (a := TNat) (a' := TNat) in H1.
+  + apply S_Ety with (a := TNat) in H1.
    * apply T_Subtype_rule with (t := t2) in H1. apply H1. apply IHhas_type_s2.
-   * reflexivity.
 - apply T_Num.
 - apply T_Plus.
-  + apply S_Ety with (a := TNat) (a' := TNat) in H1.
+  + apply S_Ety with (a := TNat) in H1.
    * apply T_Subtype_rule with (t := t1) in H1. apply H1. apply IHhas_type_s1.
-   * reflexivity.
-  + apply S_Ety with (a := TNat) (a' := TNat) in H1.
+  + apply S_Ety with (a := TNat) in H1.
    * apply T_Subtype_rule with (t := t2) in H1. apply H1. apply IHhas_type_s2.
-   * reflexivity.
 - apply T_Minus.
-  + apply S_Ety with (a := TNat) (a' := TNat) in H1.
+  + apply S_Ety with (a := TNat) in H1.
    * apply T_Subtype_rule with (t := t1) in H1. apply H1. apply IHhas_type_s1.
-   * reflexivity.
-  + apply S_Ety with (a := TNat) (a' := TNat) in H1.
+  + apply S_Ety with (a := TNat) in H1.
    * apply T_Subtype_rule with (t := t2) in H1. apply H1. apply IHhas_type_s2.
-   * reflexivity.
 - apply T_Mult.
-  + apply S_Ety with (a := TNat) (a' := TNat) in H1.
+  + apply S_Ety with (a := TNat) in H1.
    * apply T_Subtype_rule with (t := t1) in H1. apply H1. apply IHhas_type_s1.
-   * reflexivity.
-  + apply S_Ety with (a := TNat) (a' := TNat) in H1.
+  + apply S_Ety with (a := TNat) in H1.
    * apply T_Subtype_rule with (t := t2) in H1. apply H1. apply IHhas_type_s2.
-   * reflexivity.
 - apply T_Id.
 - apply T_Skip.
 - apply S_Cmd in H1. apply T_Subtype_rule with (t := iass t1 t2) in H1. apply H1.
@@ -368,15 +355,35 @@ Qed.
 Lemma six_one : forall (p p': ta) (r: tm),  (*do we need 4.1 here ? *)
   |-- r \in p -> subtype p p' -> |-- r \in p' .
 Proof.
-intros.
-  
+intros p p' r H. generalize dependent p'.
 (*induction H0.
 - apply six_two_right in H.
 induction H.
 - apply T_Subtype_rule with (t := iBool n) in H0. apply S_Bool with (n := n) in H. apply six_two_right in H.*)
-
 induction H.
-- apply S_Ety with (a := TBool) (a' := TBool) in H. apply S_Trans with (a := Ety TBool s) in H0.
++ intros. remember (Ety TBool s). induction H; try constructor; try contradiction.
+  -inversion Heqt. constructor.
+  - inversion Heqt.
+  - subst. constructor.
+  - remember (a=Ety TBool s). apply IHsubtype1 in Heqt. inversion Heqt.  remember (Ety TBool s).
+
+
+
+
+
+
+
+
+
+
+
+
+ (*apply S_Bool. apply S_Bool.
+ + apply S_Bool with (s':=s'0) (s:=s). apply trans_less_equal_to with (b := s'). apply H. apply H3.
+ + apply S_Bool with (s:=s). apply H.
+ +*)
+
+
 Admitted.
 
 
@@ -385,7 +392,7 @@ Theorem six_two_left: forall (p: ta) (r: tm),
 Proof.
 intros.
 induction H.
-- apply S_Bool with (s := s). apply Let_ss.
+- apply S_Bool with (s := s).
 - apply S_And with (s := s). apply IHhas_type1. apply IHhas_type2. apply Let_ss.
 - apply S_Or with (s := s). apply IHhas_type1. apply IHhas_type2. apply Let_ss.
 - apply S_Not with (s := s). apply IHhas_type. apply Let_ss.
@@ -403,6 +410,49 @@ induction H.
 - apply S_While with (s := s). apply IHhas_type1. apply IHhas_type2. apply Let_ss.
 - apply six_one with (r := t) in H0. apply H0. apply IHhas_type.
 Qed.
+
+
+(* Introduce lemma to reduce proof for six_two_right*)
+(*Lemma six_two_1 : forall (p1 p2: tm) (s s': sec), 
+    |-- p1 \in Ety TBool s  ->
+    |-- p2 \in Ety TBool s  -> less_equal_to s s'->
+    |- p1 \in Ety TBool s ->
+    |- p2 \in Ety TBool s ->
+    |- p1 \in Ety TBool s' -> |- p2 \in Ety TBool s'.
+Proof.
+  intros.
+ - apply S_Ety with (a := TBool) (a' := TBool) in H1.
+   + apply T_Subtype_rule with (t:= p2) in H1.
+     apply H1.
+     apply H3.
+  + reflexivity.
+Qed.
+*)
+(*Lemma six_one : forall (p p': ta) (r: tm),
+  |- r \in p -> subtype p p' -> |- r \in p' .
+Proof.
+(*intros.
+induction H.
+- apply T_Subtype_rule with (a:= Ety TBool s).
+  + apply T_Bool.
+  +apply H0.
+- apply T_Subtype_rule with (a:= Ety TBool s).
+  + apply T_And. apply H. apply H1.    (*automate for every case..? maybe next method less mechanical*) *)
+intros.
+induction H0.
+- apply T_Subtype_rule with (a:= Ety a s).
+  + apply H.
+  + apply S_Ety. apply H0. apply H1.
+- apply T_Subtype_rule with (a:= TId a s).
+  + apply H.
+  + apply S_TId. apply H0. apply H1.
+- apply H.
+- apply IHsubtype2. apply IHsubtype1. apply H.
+- apply T_Subtype_rule with (a:= TCom s').
+  + apply H.
+  + apply S_Cmd. apply H0.
+Qed. *)
+
 
 (*445
 
