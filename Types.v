@@ -142,17 +142,30 @@ Inductive subtype: ta-> ta-> Prop :=
  | S_TId : forall (s s': sec) (a a': ty),
      less_equal_to s s' -> a=a' ->
      subtype (TId a s) (TId a' s')
- | S_Reflex : forall (a:ta),
-     subtype a a 
- | S_Trans : forall (a b c:ta),
-     subtype a b ->
-     subtype b c ->
-     subtype a c
  | S_Cmd : forall (s s': sec),
      less_equal_to s' s ->
-     subtype (TCom s) (TCom s') .  (* changed dir of s and s' cuz was clashing with has_type_s less_equal_to direction*)
+     subtype (TCom s) (TCom s').
+(* changed dir of s and s' cuz was clashing with has_type_s less_equal_to direction*)
 
-(*Example newt : subtype ( Ety TNat Low) ( Ety TNat High).
+Theorem sub_refl : forall (a:ta),
+     subtype a a.
+Proof.
+- intros a.  induction a.
+  + apply S_Ety. apply Let_ss.
+  + apply S_Cmd. apply Let_ss.
+  + apply S_TId. apply Let_ss.
+    reflexivity.
+Qed.
+
+Theorem sub_trans : forall (a b c:ta),
+     subtype a b ->
+     subtype b c ->
+     subtype a c.
+Proof.
+  -intros a b c.
+Admitted.
+ 
+  (*Example newt : subtype ( Ety TNat Low) ( Ety TNat High).
 Proof.
 apply S_Ety.
 - constructor.
@@ -254,9 +267,8 @@ Inductive has_type_s : tm -> ta -> Prop :=
        |-- t1 \in Ety TNat s ->
        |-- t2 \in Ety TNat s ->less_equal_to s s' ->
        |-- ible t1 t2 \in Ety TBool s'
-   | S_Num : forall (n:nat) (s s': sec),
-       less_equal_to s s' ->
-       |-- iNum n \in Ety TNat s'                                        
+   | S_Num : forall (n:nat) (s: sec),
+       |-- iNum n \in Ety TNat s                                        
    | S_Plus : forall (t1 t2:tm) (s s': sec),
        |-- t1 \in Ety TNat s->
        |-- t2 \in Ety TNat s->less_equal_to s s' ->
@@ -269,9 +281,8 @@ Inductive has_type_s : tm -> ta -> Prop :=
        |-- t1 \in Ety TNat s->
        |-- t2 \in Ety TNat s->less_equal_to s s' ->
        |-- imult t1 t2 \in Ety TNat s'
-   | S_Id : forall (n: id) (t: ty) (s s': sec),
-       less_equal_to s s' ->
-       |-- iId n \in TId t s'                
+   | S_Id : forall (n: id) (t: ty) (s: sec),
+       |-- iId n \in TId t s                
    | S_Skip : forall (s s':sec),
        less_equal_to s' s ->
        |-- iskip \in TCom s'                                      
@@ -348,42 +359,30 @@ apply T_Subtype_rule with (t := iass t1 t2) in H1. apply H1. apply T_Ass with (t
 - apply S_Cmd in H2. apply T_Subtype_rule with (t := iif t1 t2 t3) in H2. apply H2. apply T_If. apply IHhas_type_s1. apply IHhas_type_s2. apply IHhas_type_s3.
 - apply S_Cmd in H1. apply T_Subtype_rule with (t := iwhile t1 t2) in H1. apply H1. apply T_While. apply IHhas_type_s1. apply IHhas_type_s2.
 Qed.
-
-
+      
 Lemma six_one : forall (p p': ta) (r: tm),  (*do we need 4.1 here ? *)
-  |-- r \in p -> subtype p p' -> |-- r \in p' .
+    |-- r \in p -> subtype p p' -> |-- r \in p' .
 Proof.
-intros p p' r H. generalize dependent p'.
+(*  intros. induction H0. *)
+  (*generalize dependent p'.*)
 (*induction H0.
 - apply six_two_right in H.
 induction H.
 - apply T_Subtype_rule with (t := iBool n) in H0. apply S_Bool with (n := n) in H. apply six_two_right in H.*)
+- intros.
 induction H.
-+ intros. remember (Ety TBool s). induction H; try constructor; try contradiction.
-  - inversion Heqt. constructor.
++ intros. remember (Ety TBool s). induction 0; try constructor; try contradiction.
+ (* - inversion Heqt. constructor.
   - inversion Heqt.
   - subst. constructor.
   - remember (a=Ety TBool s). apply IHsubtype1 in Heqt. inversion Heqt.  remember (Ety TBool s).
-    
-
-
-
-
-
-
-
-
-
-
-
+*)
  (*apply S_Bool. apply S_Bool.
  + apply S_Bool with (s':=s'0) (s:=s). apply trans_less_equal_to with (b := s'). apply H. apply H3.
  + apply S_Bool with (s:=s). apply H.
  +*)
 
-
 Admitted.
-
 
 Theorem six_two_left: forall (p: ta) (r: tm),
   |- r \in p -> |-- r \in p .
@@ -396,11 +395,11 @@ induction H.
 - apply S_Not with (s := s). apply IHhas_type. apply Let_ss.
 - apply S_Eq with (s := s). apply IHhas_type1. apply IHhas_type2. apply Let_ss.
 - apply S_Ble with (s := s). apply IHhas_type1. apply IHhas_type2. apply Let_ss.
-- apply S_Num with (s := s). apply Let_ss.
+- apply S_Num with (s:= s).  
 - apply S_Plus with (s := s). apply IHhas_type1. apply IHhas_type2. apply Let_ss.
 - apply S_Minus with (s := s). apply IHhas_type1. apply IHhas_type2. apply Let_ss.
 - apply S_Mult with (s := s). apply IHhas_type1. apply IHhas_type2. apply Let_ss.
-- apply S_Id with (s := s). apply Let_ss.
+- apply S_Id with (s := s).
 - apply S_Skip with (s := s). apply Let_ss.
 - apply S_Ass with (s := s) (t := t). apply IHhas_type1. apply IHhas_type2. apply Let_ss.
 - apply S_seq with (s := s). apply IHhas_type1. apply IHhas_type2. apply Let_ss.
