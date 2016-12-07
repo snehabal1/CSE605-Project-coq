@@ -369,10 +369,29 @@ Qed.
 Lemma six_one : forall (p p': ta) (r: tm),  (*do we need 4.1 here ? *)
     |-- r \in p -> subtype p p' -> |-- r \in p' .
 Proof.
-
-  - intros.
+intros.
 induction H.
-  + intros. remember (Ety TBool s). induction 0. try constructor; try contradiction.
+- inversion H0. apply S_Bool.
+- inversion H0. apply trans_less_equal_to with (a:=s)(b:=s') in H6.
+ + apply S_And with (t1:=t1)(t2:=t2) in H6.
+  * apply H6.
+  * apply H.
+  * apply H1.
+ + apply H2.
+- inversion H0. apply trans_less_equal_to with (a:=s)(b:=s') in H6.
+ + apply S_Or with (t1:=t1)(t2:=t2) in H6.
+  * apply H6.
+  * apply H.
+  * apply H1.
+ + apply H2.
+-
+
+
+
+
+- intros.
+induction H.
+  + intros. remember (Ety TBool s). induction 0.
     * inversion Heqt.  apply S_Bool.
     * inversion Heqt.
     * inversion Heqt.  
@@ -399,8 +418,6 @@ induction H.
 induction H0.
 - induction a.
  + apply S_Bool with (r:=iBool n) in S_Bool.*)
-intros.
-induction H.
 Admitted.
 
 Theorem six_two_left: forall (p: ta) (r: tm),
