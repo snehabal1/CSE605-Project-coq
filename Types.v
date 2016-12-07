@@ -419,8 +419,7 @@ Proof.
    + apply T_Subtype_rule with (t:= p2) in H1.
      apply H1.
      apply H3.
-  + reflexivity.
-Qed.
+  + reflexivity.Qed.
 *)
 (*Lemma six_one : forall (p p': ta) (r: tm),
   |- r \in p -> subtype p p' -> |- r \in p' .
