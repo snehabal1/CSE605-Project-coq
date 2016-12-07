@@ -136,9 +136,9 @@ Inductive subtype: ta-> ta-> Prop :=
  | S_Ety : forall (s s': sec) (a : ty),
      less_equal_to s s' ->
      subtype (Ety a s) (Ety a s')
- | S_TId : forall (s s': sec) (a a': ty),
-     less_equal_to s s' -> a=a' ->
-     subtype (TId a s) (TId a' s')
+ | S_TId : forall (s s': sec) (a : ty),
+     less_equal_to s s' ->
+     subtype (TId a s) (TId a s')
  | S_Cmd : forall (s s': sec),
      less_equal_to s' s ->
      subtype (TCom s) (TCom s').
@@ -151,7 +151,6 @@ Proof.
   + apply S_Ety. apply Let_ss.
   + apply S_Cmd. apply Let_ss.
   + apply S_TId. apply Let_ss.
-    reflexivity.
 Qed.
 
 Theorem sub_trans : forall (a b c:ta),
@@ -466,7 +465,7 @@ apply T_Subtype_rule with (a:= Ety TNat Low).
   + reflexivity.
 Qed.
 *)
-Example subtype_if :
+(*Example subtype_if :
   |- iif (iBool true) (iskip) (iass (iId (Id 0)) (iNum 5)) \in TCom High.
 Proof.
 apply T_Subtype_rule with (a:= TCom Low).
@@ -518,7 +517,7 @@ Proof.
   apply T_And.
   - apply T_Bool. 
   - apply T_Bool.
-Qed.
+Qed. *)
 
 (*
 Example type_not_sec :
