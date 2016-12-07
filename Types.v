@@ -158,8 +158,18 @@ Theorem sub_trans : forall (a b c:ta),
      subtype b c ->
      subtype a c.
 Proof.
-  -intros a b c.
-Admitted.
+intros.
+induction H.
+- inversion H0. apply trans_less_equal_to with (a:=s)(b:=s') in H4.
+ + apply S_Ety. apply H4.
+ + apply H.
+- inversion H0. apply trans_less_equal_to with (a:=s)(b:=s') in H4.
+ + apply S_TId. apply H4.
+ +apply H.
+- inversion H0. apply trans_less_equal_to with (a:=s'0)(b:=s') in H.
+ + apply S_Cmd. apply H.
+ + apply H2.
+Qed.
  
   (*Example newt : subtype ( Ety TNat Low) ( Ety TNat High).
 Proof.
@@ -365,9 +375,9 @@ Proof.
 - apply six_two_right in H.
 induction H.
 - apply T_Subtype_rule with (t := iBool n) in H0. apply S_Bool with (n := n) in H. apply six_two_right in H.*)
-- intros.
+(*- intros.
 induction H.
-+ intros. remember (Ety TBool s). induction 0; try constructor; try contradiction.
++ intros. remember (Ety TBool s). induction 0; try constructor; try contradiction.*)
  (* - inversion Heqt. constructor.
   - inversion Heqt.
   - subst. constructor.
@@ -377,7 +387,12 @@ induction H.
  + apply S_Bool with (s':=s'0) (s:=s). apply trans_less_equal_to with (b := s'). apply H. apply H3.
  + apply S_Bool with (s:=s). apply H.
  +*)
-
+(*intros.
+induction H0.
+- induction a.
+ + apply S_Bool with (r:=iBool n) in S_Bool.*)
+intros.
+induction H.
 Admitted.
 
 Theorem six_two_left: forall (p: ta) (r: tm),
@@ -517,7 +532,7 @@ Proof.
   apply T_And.
   - apply T_Bool. 
   - apply T_Bool.
-Qed. *)
+Qed. *)6
 
 (*
 Example type_not_sec :
