@@ -369,6 +369,14 @@ Qed.
 Lemma six_one : forall (p p': ta) (r: tm),  (*do we need 4.1 here ? *)
     |-- r \in p -> subtype p p' -> |-- r \in p' .
 Proof.
+
+  - intros.
+induction H.
+  + intros. remember (Ety TBool s). induction 0. try constructor; try contradiction.
+    * inversion Heqt.  apply S_Bool.
+    * inversion Heqt.
+    * inversion Heqt.  
+  + intros. 
 (*  intros. induction H0. *)
   (*generalize dependent p'.*)
 (*induction H0.
