@@ -419,7 +419,8 @@ Proof.
    + apply T_Subtype_rule with (t:= p2) in H1.
      apply H1.
      apply H3.
-  + reflexivity.Qed.
+  + reflexivity.
+Qed.
 *)
 (*Lemma six_one : forall (p p': ta) (r: tm),
   |- r \in p -> subtype p p' -> |- r \in p' .
@@ -454,7 +455,7 @@ Proof.
   apply R_Ass_s with (t := TNat) (s:= Low).
  *)
 
-Example subtype_in:
+(*Example subtype_in:
   |- iNum 4 \in Ety TNat High.
 Proof.
 apply T_Subtype_rule with (a:= Ety TNat Low). 
@@ -464,7 +465,7 @@ apply T_Subtype_rule with (a:= Ety TNat Low).
 
   + reflexivity.
 Qed.
-
+*)
 Example subtype_if :
   |- iif (iBool true) (iskip) (iass (iId (Id 0)) (iNum 5)) \in TCom High.
 Proof.
