@@ -378,24 +378,63 @@ induction H.
   * apply H.
   * apply H1.
  + apply H2.
+   
 - inversion H0. apply trans_less_equal_to with (a:=s)(b:=s') in H6.
  + apply S_Or with (t1:=t1)(t2:=t2) in H6.
   * apply H6.
   * apply H.
   * apply H1.
  + apply H2.
--
+   
+-inversion H0. apply trans_less_equal_to with (a:=s)(b:=s') in H5.
+ + apply S_Not with (t1:=t1) in H5.
+  * apply H5.
+  * apply H.
+  + apply H1.
 
+- inversion H0. apply trans_less_equal_to with (a:= s) (b:= s') in H6.
+ + apply S_Eq with (t1:=t1) (t2:= t2) in H6.
+  * apply H6. 
+  * apply H.
+  * apply H1.
+ +  apply H2.
 
+- inversion H0. apply trans_less_equal_to with (a:= s) (b:= s') in H6.
+ + apply S_Ble with (t1:=t1) (t2:= t2) in H6.
+  * apply H6. 
+  * apply H.
+  * apply H1.
+ +  apply H2.
 
+- inversion H0. apply S_Num.
+  
+- inversion H0. apply trans_less_equal_to with (a:= s) (b:= s') in H6.
+ + apply S_Plus with (t1:=t1) (t2:= t2) in H6.
+  * apply H6. 
+  * apply H.
+  * apply H1.
+ +  apply H2.
 
-- intros.
-induction H.
-  + intros. remember (Ety TBool s). induction 0.
-    * inversion Heqt.  apply S_Bool.
-    * inversion Heqt.
-    * inversion Heqt.  
-  + intros. 
+- inversion H0. apply trans_less_equal_to with (a:= s) (b:= s') in H6.
+ + apply S_Minus with (t1:=t1) (t2:= t2) in H6.
+  * apply H6. 
+  * apply H.
+  * apply H1.
+ +  apply H2.
+
+- inversion H0. apply trans_less_equal_to with (a:= s) (b:= s') in H6.
+ + apply S_Mult with (t1:=t1) (t2:= t2) in H6.
+  * apply H6. 
+  * apply H.
+  * apply H1.
+ +  apply H2.
+
+- inversion H0. apply S_Id.
+
+- inversion H0. apply trans_less_equal_to with (a:= s) (b:= s') in H.
+ + apply S_Skip (s:= s0).
+
+   
 (*  intros. induction H0. *)
   (*generalize dependent p'.*)
 (*induction H0.
