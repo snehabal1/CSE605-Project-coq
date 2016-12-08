@@ -431,11 +431,42 @@ induction H.
 
 - inversion H0. apply S_Id.
 
-- inversion H0. apply trans_less_equal_to with (a:= s) (b:= s') in H.
- + apply S_Skip (s:= s0).
+- inversion H0. apply trans_less_equal_to with (a:= s'0) (b:= s') in H.
+ + apply S_Skip in H2.
+   *apply H2.
+ + apply H2.
 
+- inversion H0. apply trans_less_equal_to with (a:= s'0) (b:= s') in H2.
+ + apply S_Ass with (t1:= t1) (t2:= t2) (t:= t) in H2.
+   *apply H2.
+ * apply H.
+ * apply H1.
+   + apply H4.
+
+-inversion H0. apply trans_less_equal_to with (a:= s'0) (b:= s') in H2.
+ + apply S_seq with (t1:= t1) (t2:= t2) in H2.
+   *apply H2.
+ * apply H.
+ * apply H1.
+   + apply H4.
+
+-inversion H0. apply trans_less_equal_to with (a:= s'0) (b:= s') in H3.
+ + apply S_If with (t1:= t1) (t2:= t2) (t3:= t3) in H3.
+   *apply H3.
+ * apply H.
+ * apply H1.
+ * apply H2.
+ + apply H5.
    
-(*  intros. induction H0. *)
+-inversion H0. apply trans_less_equal_to with (a:= s'0) (b:= s') in H2.
+ + apply S_While with (t1:= t1) (t2:= t2) in H2.
+   *apply H2.
+ * apply H.
+ * apply H1.
+ + apply H4.
+
+Qed.
+     (*  intros. induction H0. *)
   (*generalize dependent p'.*)
 (*induction H0.
 - apply six_two_right in H.
@@ -457,7 +488,7 @@ induction H.
 induction H0.
 - induction a.
  + apply S_Bool with (r:=iBool n) in S_Bool.*)
-Admitted.
+
 
 Theorem six_two_left: forall (p: ta) (r: tm),
   |- r \in p -> |-- r \in p .
