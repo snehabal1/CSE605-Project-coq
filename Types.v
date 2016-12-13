@@ -85,11 +85,6 @@ Inductive ta : Type :=
   | TCom : sec -> ta
   | TId : ty -> sec -> ta.
 
-(*Inductive less_equal_to : sec -> sec -> Prop :=
-| Let_HH : less_equal_to High High
-| Let_LL : less_equal_to Low Low
-| Let_LH : less_equal_to Low High.*)
-
 Inductive less_equal_to : sec -> sec -> Prop :=
 | Let_ss : forall (s:sec),
   less_equal_to s s
@@ -103,13 +98,13 @@ Proof.
 intros.
 destruct H. apply H0. inversion H0. apply Let_LH.
 Qed.
-
-(*Example test_hl: ~ (less_equal_to High Low).
+(*
+Example test_hl: ~ (less_equal_to High Low).
 Proof.
 intros.
-unfold not. *)
-
-
+unfold not. 
+- apply Let_LH.
+*)
 Definition meet (l h:sec) : sec :=
   match l, h with
   |Low, High => Low
@@ -171,13 +166,6 @@ induction H.
  + apply H2.
 Qed.
  
-  (*Example newt : subtype ( Ety TNat Low) ( Ety TNat High).
-Proof.
-apply S_Ety.
-- constructor.
-- reflexivity.
-Qed.*)
-
 (** In informal notation, the typing relation is often written
     [|- t \in T] and pronounced "[t] has type [T]."  The [|-] symbol
     is called a "turnstile."  Below, we're going to see richer typing
@@ -186,6 +174,7 @@ Qed.*)
     is always empty. *)
 
 Reserved Notation "'|-' t '\in' T" (at level 40).
+
 (*subtyping low into high for further use, low and high as lattice, *)
 Inductive has_type : tm -> ta -> Prop :=
    | T_Bool : forall (n: bool) (s: sec),
@@ -374,9 +363,9 @@ induction H.
 - inversion H0. apply S_Bool.
 - inversion H0. apply trans_less_equal_to with (a:=s)(b:=s') in H6.
  + apply S_And with (t1:=t1)(t2:=t2) in H6.
-  * apply H6.
-  * apply H.
-  * apply H1.
+   * apply H6.
+   * apply H.
+   * apply H1.
  + apply H2.
    
 - inversion H0. apply trans_less_equal_to with (a:=s)(b:=s') in H6.
@@ -464,31 +453,7 @@ induction H.
  * apply H.
  * apply H1.
  + apply H4.
-
 Qed.
-     (*  intros. induction H0. *)
-  (*generalize dependent p'.*)
-(*induction H0.
-- apply six_two_right in H.
-induction H.
-- apply T_Subtype_rule with (t := iBool n) in H0. apply S_Bool with (n := n) in H. apply six_two_right in H.*)
-(*- intros.
-induction H.
-+ intros. remember (Ety TBool s). induction 0; try constructor; try contradiction.*)
- (* - inversion Heqt. constructor.
-  - inversion Heqt.
-  - subst. constructor.
-  - remember (a=Ety TBool s). apply IHsubtype1 in Heqt. inversion Heqt.  remember (Ety TBool s).
-*)
- (*apply S_Bool. apply S_Bool.
- + apply S_Bool with (s':=s'0) (s:=s). apply trans_less_equal_to with (b := s'). apply H. apply H3.
- + apply S_Bool with (s:=s). apply H.
- +*)
-(*intros.
-induction H0.
-- induction a.
- + apply S_Bool with (r:=iBool n) in S_Bool.*)
-
 
 Theorem six_two_left: forall (p: ta) (r: tm),
   |- r \in p -> |-- r \in p .
@@ -515,55 +480,7 @@ induction H.
 Qed.
 
 
-(* Introduce lemma to reduce proof for six_two_right*)
-(*Lemma six_two_1 : forall (p1 p2: tm) (s s': sec), 
-    |-- p1 \in Ety TBool s  ->
-    |-- p2 \in Ety TBool s  -> less_equal_to s s'->
-    |- p1 \in Ety TBool s ->
-    |- p2 \in Ety TBool s ->
-    |- p1 \in Ety TBool s' -> |- p2 \in Ety TBool s'.
-Proof.
-  intros.
- - apply S_Ety with (a := TBool) (a' := TBool) in H1.
-   + apply T_Subtype_rule with (t:= p2) in H1.
-     apply H1.
-     apply H3.
-  + reflexivity.
-Qed.
-*)
-(*Lemma six_one : forall (p p': ta) (r: tm),
-  |- r \in p -> subtype p p' -> |- r \in p' .
-Proof.
-(*intros.
-induction H.
-- apply T_Subtype_rule with (a:= Ety TBool s).
-  + apply T_Bool.
-  +apply H0.
-- apply T_Subtype_rule with (a:= Ety TBool s).
-  + apply T_And. apply H. apply H1.    (*automate for every case..? maybe next method less mechanical*) *)
-intros.
-induction H0.
-- apply T_Subtype_rule with (a:= Ety a s).
-  + apply H.
-  + apply S_Ety. apply H0. apply H1.
-- apply T_Subtype_rule with (a:= TId a s).
-  + apply H.
-  + apply S_TId. apply H0. apply H1.
-- apply H.
-- apply IHsubtype2. apply IHsubtype1. apply H.
-- apply T_Subtype_rule with (a:= TCom s').
-  + apply H.
-  + apply S_Cmd. apply H0.
-Qed. *)
-
-
-(*445
-Example type_ass_s :
-  |- (iass (iId (Id 0)) (iNum 5)) \in TCom High.
-Proof.
-  apply R_Ass_s with (t := TNat) (s:= Low).
- *)
-
+(* Examples used to cross check definitions *)
 (*Example subtype_in:
   |- iNum 4 \in Ety TNat High.
 Proof.
@@ -627,7 +544,7 @@ Proof.
   apply T_And.
   - apply T_Bool. 
   - apply T_Bool.
-Qed. *)6
+Qed. *)
 
 (*
 Example type_not_sec :
@@ -665,8 +582,7 @@ Proof.
   - apply T_Num.
 Qed.
 *)
-(*Create a separate inductive type to define T_meet and T_join? *)
-Check iif (iBool true) (iNum 5) (iNum 4).
+
 (*will only compile till here cuz examples not modified yet
 Example type_not_if :
   ~ ( |- iif (iNum 4) iskip iskip \in TCom).
@@ -723,56 +639,6 @@ Example has_id :
 Proof.
 -apply T_Id.
 Qed.
-Check iNum 5.
-Example has_while :
-|- iwhile (iBool true) (iass (iId (Id 0)) (iNum 5)) \in TCom.
-Proof.
-  apply T_While.
-  + apply T_Bool.
-  + apply T_Ass with (s:= TNat).
-    - apply T_Id.
-    - apply T_Num.
-Qed.
- 
-Example has_type_not :
-|- (iif (iBool true) (iass (iId (Id 0)) (iNum 5)) (iass (iId (Id 0)) (iNum 4))) \in TCom.
-Proof.
-  apply T_If.
-  + apply T_Bool.
-  + apply T_Ass with (s:= TNat).
-    - apply T_Id.
-    - apply T_Num.   
-  + apply T_Ass with (s:= TNat).
-    - apply T_Id.
-    - apply T_Num.
-Qed.
-Check iass (iId (Id 0)) (iNum 5).
-Example has_ass :
-|- (iass (iId (Id 0)) (iNum 5)) \in TCom.
-Proof.
-  apply T_Ass with (s:= TNat).
-  apply T_Id.
-  apply T_Num.
-  Qed.
-Check iass (iass (iId (Id 0)) (iNum 5)) (iass (iId (Id 0)) (iNum 6)).
-Example test_not_iif :
-~ (|- iif (iNum 4) iskip iskip \in TCom).
-Proof.
-unfold not. intros.
-inversion H.
-inversion H3.
-Qed.
-(*
-Example has_not_ass :
-~ (|- iass (iass (iId (Id 0)) (iNum 5)) (iass (iId (Id 0)) (iNum 6)) \in TCom).
-Proof.
-unfold not.
-intros.
-inversion H.
-inversion H2.
-Qed.
-  apply T_Ass with (s:= TNat).
-  apply T_Id.
-  apply T_Num.
-  Qed.*)
-*)
+
+
+
