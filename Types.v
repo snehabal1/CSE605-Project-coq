@@ -481,39 +481,80 @@ Qed.
 
 
 (* Examples used to cross check definitions *)
-(*Example subtype_in:
+(* low-> high for num and id*)
+Example subtype_in:
   |- iNum 4 \in Ety TNat High.
 Proof.
 apply T_Subtype_rule with (a:= Ety TNat Low). 
 - apply T_Num.
 - apply S_Ety.
   + constructor.
-
-  + reflexivity.
 Qed.
-*)
-(*Example subtype_if :
-  |- iif (iBool true) (iskip) (iass (iId (Id 0)) (iNum 5)) \in TCom High.
+
+Example subtype_s_in:
+  |-- iNum 4 \in Ety TNat High.
 Proof.
-apply T_Subtype_rule with (a:= TCom Low).
+intros.
+apply S_Num.
+Qed.
+
+(*from high -> low for commands*)
+Example subtype_if :
+  |- iif (iBool true) (iskip) (iass (iId (Id 0)) (iNum 5)) \in TCom Low.
+Proof.
+apply T_Subtype_rule with (a:= TCom High).
 - apply T_If.
  +constructor.
  +constructor.
  + apply T_Ass with (t:= TNat).
    * apply T_Id with (t:= TNat).
-Admitted.
+   * apply T_Num.
+- apply S_Cmd. constructor.
+Qed.
 
-Example type_id_sec :
+Example subtype_s_if :
+  |-- iif (iBool true) (iskip) (iass (iId (Id 0)) (iNum 5)) \in TCom Low.
+Proof.
+apply S_If with (s:=High).
+ + constructor.
+ + apply S_Skip with (s:= High).
+   *constructor.
+ + apply S_Ass with (t:=TNat) (s:= High).
+   * constructor.
+   * constructor.
+   * constructor.
+ + constructor.
+Qed.
+
+Example subtype_plus :
+  |- iplus (iNum 1) (iNum 2) \in Ety TNat High.
+Proof.
+apply T_Subtype_rule with (a:= Ety TNat Low).      
+-apply T_Plus.
+ + apply T_Num.
+ + apply T_Num.
+-apply S_Ety. constructor.
+Qed.
+
+Example subtype_s_plus :
+  |-- iplus (iNum 1) (iNum 2) \in Ety TNat High.
+Proof.
+apply S_Plus with (s:=Low).
+- apply S_Num.
+- apply S_Num.
+- constructor.
+Qed.
+
+Example subtype_id :
   |- iId (Id 0) \in TId TNat High.
 Proof.
 apply T_Subtype_rule with (a:= TId TNat Low).
 - apply T_Id.
 - apply S_TId.   
  + apply Let_LH.
- + reflexivity.
 Qed.
 
-Example type_ass_sec :
+(*Example type_ass_sec :
   |- (iass (iId (Id 0)) (iNum 5)) \in TCom High.
 Proof.
 apply T_Ass with (t:= TNat).
